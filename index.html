@@ -398,6 +398,10 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <label class="switch"><input type="checkbox" id="al-favonly"><span class="slider"></span></label>
       <span>Nur Favoriten anzeigen</span>
     </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="al-advonly"><span class="slider"></span></label>
+      <span>Nur fortgeschrittene Übungen anzeigen</span>
+    </div>
     <div id="al-count" class="mini" style="margin-top:10px;"></div>
   </div>
   <div id="al-list"></div>
@@ -439,7 +443,7 @@ canvas{width:100%;height:auto;margin-top:10px;}
 <div class="view" id="view-data">
   <div class="panel">
     <h2>Speichern &amp; Exportieren</h2>
-    <div class="info sun"><h4>Wichtig für iPhone / iPad</h4>Safari kann lokal gespeicherte Daten nach einiger Zeit löschen. Nutze deshalb regelmäßig <strong>„Exportieren"</strong> und sichere die Datei in <strong>Dateien / iCloud</strong>. So geht nichts verloren.</div>
+    <div class="info sun"><h4>Daten sichern</h4>Lokal gespeicherte Browserdaten können gelegentlich durch System-Updates gelöscht werden. Nutze regelmäßig <strong>„Exportieren"</strong>, um ein Backup als Datei zu sichern.</div>
     <div class="actions" style="margin-top:0;">
       <button type="button" class="act primary" data-act="savelocal">Im Browser speichern</button>
       <button type="button" class="act" data-act="export">Exportieren (Datei)</button>
@@ -453,9 +457,9 @@ canvas{width:100%;height:auto;margin-top:10px;}
   <div class="panel">
     <h2>So nutzt du das Tool dauerhaft</h2>
     <div class="footer-note" style="margin-top:0;">
-      <strong>iPhone/iPad:</strong> Datei in „Dateien" (iCloud Drive) ablegen, mit Safari öffnen. Zum Home-Bildschirm hinzufügen: Teilen-Symbol → „Zum Home-Bildschirm". Dann startet es wie eine App.<br><br>
-      <strong>Als PDF sichern/drucken:</strong> Erst einen Plan erstellen, dann Teilen → Drucken → mit zwei Fingern auf die Vorschau ziehen → Teilen → „In Dateien sichern".<br><br>
-      <strong>Regelmäßig exportieren</strong> ist die sicherste Methode, damit deine Programme und Körperwerte erhalten bleiben.
+      <strong>Home-Bildschirm App:</strong> Öffne die Webseite im Browser deines Smartphones. Tippe auf das Teilen-Symbol (iOS) bzw. das Menü (Android) und wähle <strong>„Zum Home-Bildschirm"</strong>. Dann startet das Tool wie eine native App.<br><br>
+      <strong>Als PDF sichern/drucken:</strong> Erstelle einen Trainingsplan, tippe auf „Als PDF / Drucken" und sichere den Plan direkt in deinen Dateien.<br><br>
+      <strong>Regelmäßig exportieren:</strong> Sichere deine erstellten Programme, Notizen und Körperwerte als Datei, um sie jederzeit wiederherstellen zu können.
     </div>
   </div>
 </div>
@@ -633,6 +637,9 @@ document.querySelectorAll('#al-equipFilter .opt').forEach(function(el){el.addEve
 });});
 var favonly=document.getElementById('al-favonly');
 if(favonly)favonly.addEventListener('change',function(e){alleFilter.favonly=e.target.checked;renderAlle();});
+var advonly=document.getElementById('al-advonly');
+if(advonly)advonly.addEventListener('change',function(e){alleFilter.advonly=e.target.checked;renderAlle();});
+
 document.getElementById('s-pulse').addEventListener('change',e=>S.single.pulse=e.target.checked);
 document.getElementById('s-advanced').addEventListener('change',e=>S.single.advanced=e.target.checked);
 document.getElementById('s-preffav').addEventListener('change',e=>S.single.prefFav=e.target.checked);
@@ -1060,7 +1067,7 @@ function renderCustom(){
   }).join('');
 }
 // ===== ALLE ÜBUNGEN (Übersicht, Favoriten, Kommentare) =====
-let alleFilter={muscle:'all',equip:'all',favonly:false};
+let alleFilter={muscle:'all',equip:'all',favonly:false,advonly:false};
 function toggleFav(name){
   const i=(S.favEx||[]).indexOf(name);
   if(i===-1)S.favEx.push(name);else S.favEx.splice(i,1);
@@ -1098,6 +1105,7 @@ function renderAlle(){
     if(alleFilter.muscle!=='all'&&ex.m.indexOf(alleFilter.muscle)===-1)return false;
     if(!exMatchesEquip(ex,alleFilter.equip))return false;
     if(alleFilter.favonly&&!favSet.has(ex.n))return false;
+    if(alleFilter.advonly&&!ex.adv)return false;
     return true;
   });
   items.sort(function(a,b){
