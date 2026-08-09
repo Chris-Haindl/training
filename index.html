@@ -12,9 +12,9 @@
 <title>Trainings-Studio · Christoph</title>
 <style>
 :root{
-  --deep:#0E3A5C; --blue:#1B6E9C; --blue-l:#E3EEF5;
-  --stone:#F7F5F0; --ink:#16222B; --sun:#F2B441;
-  --coral:#D95D4E; --green:#2E8B6E; --line:#DDD8CE;
+  --deep:#0B2A4A; --blue:#1E6FB0; --blue-l:#E4EFF8;
+  --stone:#F4F6F8; --ink:#152430; --sun:#F5A623;
+  --coral:#E0574B; --green:#2C9C7A; --line:#DBE2E8;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
@@ -22,7 +22,7 @@ button,.opt,.tabbtn,.cal-day,.dc-cell,.act,.ex-swap,.hidden-ex-tag,.custom-item 
 @supports(padding:max(0px)){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--stone);color:var(--ink);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%;}
 
-.hero{background:linear-gradient(160deg,var(--deep),var(--blue));color:#fff;padding:26px 20px 22px;}
+.hero{background:linear-gradient(155deg,var(--deep) 10%,var(--blue) 120%);color:#fff;padding:24px 20px 20px;}
 .hero-inner{max-width:900px;margin:0 auto;}
 .hero .eyebrow{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--sun);font-weight:700;margin-bottom:7px;}
 .hero h1{font-size:clamp(24px,5vw,34px);font-weight:900;text-transform:uppercase;letter-spacing:-.5px;line-height:1.05;}
@@ -53,6 +53,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .eq-item.on{background:var(--blue-l);border-color:var(--blue);font-weight:600;}
 .eq-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;}
 .eq-item.on .eq-check{background:var(--blue);border-color:var(--blue);}
+.al-card{background:#fff;border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px;}
+.al-head{display:flex;align-items:flex-start;gap:10px;}
+.al-star{font-size:22px;line-height:1;cursor:pointer;flex-shrink:0;color:#d8d2c6;user-select:none;margin-top:1px;}
+.al-star.on{color:var(--sun);}
+.al-main{flex:1;min-width:0;}
+.al-name{font-size:14.5px;font-weight:700;color:var(--deep);}
+.al-tags{font-size:11px;color:#8A94A0;margin-top:2px;}
+.al-tag{display:inline-block;background:var(--stone);border-radius:6px;padding:1px 7px;margin:2px 4px 0 0;}
+.al-tag.adv{background:#FDF3F1;color:var(--coral);}
+.al-cue{font-size:12px;color:#6B7680;margin-top:6px;}
+.al-note{font-size:12.5px;color:var(--blue);margin-top:6px;background:var(--blue-l);border-radius:8px;padding:7px 10px;}
+.al-noteedit{margin-top:8px;display:flex;gap:6px;}
+.al-noteedit input{flex:1;padding:8px 10px;font-size:13px;min-height:38px;}
+.al-noteedit button{flex-shrink:0;padding:8px 12px;font-size:12px;min-height:38px;border-radius:8px;border:1.5px solid var(--deep);background:var(--deep);color:#fff;font-weight:700;cursor:pointer;}
+.al-notebtn{font-size:11.5px;color:var(--blue);cursor:pointer;margin-top:6px;display:inline-block;border:1px solid var(--line);border-radius:6px;padding:3px 9px;}
 
 .mini{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8A94A0;font-weight:700;margin-bottom:7px;}
 .muscle-wrap{margin-top:12px;padding-top:13px;border-top:1px dashed var(--line);}
@@ -189,7 +204,6 @@ canvas{width:100%;height:auto;margin-top:10px;}
 
 <header class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">Offline-Studio · ohne Account · iPhone · iPad · Desktop</div>
     <h1>Trainings-<span class="thin">Studio</span></h1>
   </div>
 </header>
@@ -198,7 +212,8 @@ canvas{width:100%;height:auto;margin-top:10px;}
   <button class="tabbtn active" data-view="single">⚡ Einzelplan</button>
   <button class="tabbtn" data-view="program">📅 Programm</button>
   <button class="tabbtn" data-view="body">📈 Körperwerte</button>
-  <button class="tabbtn" data-view="exlib">🏋️ Übungen</button>
+  <button class="tabbtn" data-view="alle">📚 Alle Übungen</button>
+  <button class="tabbtn" data-view="exlib">🏋️ Eigene</button>
   <button class="tabbtn" data-view="data">💾 Speichern</button>
 </div></nav>
 
@@ -269,6 +284,10 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <label class="switch"><input type="checkbox" id="s-advanced"><span class="slider"></span></label>
       <span>Fortgeschrittene Übungen einschließen (z.B. Handstand-Liegestütze, Klimmzüge, Sprünge)</span>
     </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="s-preffav"><span class="slider"></span></label>
+      <span>Favoriten (★) bevorzugen</span>
+    </div>
   </div>
 
   <button type="button" class="genbtn" data-act="gensingle">Plan erstellen ⚡</button>
@@ -291,6 +310,10 @@ canvas{width:100%;height:auto;margin-top:10px;}
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="p-advanced"><span class="slider"></span></label>
       <span>Fortgeschrittene Übungen einschließen</span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-preffav"><span class="slider"></span></label>
+      <span>Favoriten (★) bevorzugen</span>
     </div>
     <div class="mini" style="margin-top:14px;">Equipment fürs ganze Programm:</div>
     <div class="opt-grid" style="margin-bottom:10px;">
@@ -338,6 +361,42 @@ canvas{width:100%;height:auto;margin-top:10px;}
     <h2>Verlauf</h2>
     <div class="log-list" id="b-log"><div class="empty">Noch keine Einträge.</div></div>
   </div>
+</div>
+
+<!-- ============ ALLE ÜBUNGEN ============ -->
+<div class="view" id="view-alle">
+  <div class="panel">
+    <h2>Alle Übungen</h2>
+    <p class="desc">Filtere, markiere Favoriten (★) und füge eigene Hinweise hinzu. Favoriten und Notizen erscheinen überall in deinen Plänen.</p>
+    <div class="mini">Muskelgruppe</div>
+    <div class="opt-grid" id="al-muscleFilter" style="margin-bottom:10px;">
+      <div class="opt sel" data-mf="all">Alle</div>
+      <div class="opt" data-mf="chest">Brust</div>
+      <div class="opt" data-mf="back">Rücken</div>
+      <div class="opt" data-mf="shoulders">Schultern</div>
+      <div class="opt" data-mf="arms">Arme</div>
+      <div class="opt" data-mf="legs">Beine</div>
+      <div class="opt" data-mf="core">Core</div>
+    </div>
+    <div class="mini">Equipment</div>
+    <div class="opt-grid" id="al-equipFilter" style="margin-bottom:10px;">
+      <div class="opt sel" data-ef="all">Alle</div>
+      <div class="opt" data-ef="bb">Langhantel</div>
+      <div class="opt" data-ef="dbEITHER">Kurzhantel</div>
+      <div class="opt" data-ef="bench">Bank</div>
+      <div class="opt" data-ef="pullup">Klimmzug</div>
+      <div class="opt" data-ef="rope">Battle Rope</div>
+      <div class="opt" data-ef="abtr">Bauchtrainer</div>
+      <div class="opt" data-ef="band">Bänder</div>
+      <div class="opt" data-ef="none">Körpergewicht</div>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="al-favonly"><span class="slider"></span></label>
+      <span>Nur Favoriten anzeigen</span>
+    </div>
+    <div id="al-count" class="mini" style="margin-top:10px;"></div>
+  </div>
+  <div id="al-list"></div>
 </div>
 
 <!-- ============ EXERCISE LIBRARY ============ -->
@@ -403,8 +462,6 @@ canvas{width:100%;height:auto;margin-top:10px;}
 
 <script>
 
-
-
 // ---- Delegated action handling (click + touch, iOS-robust) ----
 function handleAction(el){
   if(!el)return;
@@ -424,6 +481,9 @@ function handleAction(el){
   else if(act==='export'){exportData();}
   else if(act==='gensingle'){genSingle();}
   else if(act==='genprogram'){genProgram();}
+  else if(act==='togglefav'){toggleFav(decodeURIComponent(el.getAttribute('data-ex')));}
+  else if(act==='editnote'){openNoteEdit(el.getAttribute('data-ex'));}
+  else if(act==='savenote'){var enc=el.getAttribute('data-ex');var inp=document.getElementById('noteinput');saveComment(decodeURIComponent(enc),inp?inp.value:'');}
 }
 // equipment toggles + presets via delegation
 document.addEventListener('click',function(ev){
@@ -449,10 +509,12 @@ const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", 
 
 // =============== STATE ===============
 let S = {
-  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'30',goal:'maintain',outpos:false,pulse:true,advanced:false},
-  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'30',days:{},advanced:false},
+  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'30',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false},
+  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'30',days:{},advanced:false,prefFav:false},
   customEx:[],
   hiddenEx:[],
+  favEx:[],
+  exComments:{},
   metrics:[],
   progWeights:{}
 };
@@ -488,6 +550,7 @@ document.querySelectorAll('.tabbtn').forEach(b=>{
     document.getElementById('view-'+b.dataset.view).classList.add('active');
     if(b.dataset.view==='exlib'){renderCustom();renderHidden();}
     if(b.dataset.view==='body'){renderMetrics();}
+    if(b.dataset.view==='alle'){renderAlle();}
     window.scrollTo({top:0});
   });
 });
@@ -555,8 +618,21 @@ function applyPreset(target,preset){
 }
 renderEquipGrid('single');
 renderEquipGrid('program');
+
+// Alle-Übungen filter wiring
+document.querySelectorAll('#al-muscleFilter .opt').forEach(function(el){el.addEventListener('click',function(){
+  document.querySelectorAll('#al-muscleFilter .opt').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');
+  alleFilter.muscle=el.dataset.mf;renderAlle();
+});});
+document.querySelectorAll('#al-equipFilter .opt').forEach(function(el){el.addEventListener('click',function(){
+  document.querySelectorAll('#al-equipFilter .opt').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');
+  alleFilter.equip=el.dataset.ef;renderAlle();
+});});
+var favonly=document.getElementById('al-favonly');
+if(favonly)favonly.addEventListener('change',function(e){alleFilter.favonly=e.target.checked;renderAlle();});
 document.getElementById('s-pulse').addEventListener('change',e=>S.single.pulse=e.target.checked);
 document.getElementById('s-advanced').addEventListener('change',e=>S.single.advanced=e.target.checked);
+document.getElementById('s-preffav').addEventListener('change',e=>S.single.prefFav=e.target.checked);
 
 // program opts
 document.querySelectorAll('#p-goalOpts .opt').forEach(el=>el.addEventListener('click',()=>{
@@ -568,6 +644,7 @@ document.querySelectorAll('#p-durOpts .opt').forEach(el=>el.addEventListener('cl
 document.getElementById('p-weeks').addEventListener('change',e=>S.program.weeks=parseInt(e.target.value)||6);
 document.getElementById('p-deload').addEventListener('change',e=>S.program.deload=e.target.checked);
 document.getElementById('p-advanced').addEventListener('change',e=>S.program.advanced=e.target.checked);
+document.getElementById('p-preffav').addEventListener('change',e=>S.program.prefFav=e.target.checked);
 
 // custom muscle select
 let customMuscles=[];
@@ -577,21 +654,17 @@ document.querySelectorAll('#c-muscles .opt').forEach(el=>el.addEventListener('cl
 }));
 
 // =============== EQUIPMENT LOGIC ===============
-// Equipment set from cfg.equip (array of codes). Codes:
-// bb, dbH (heavy db), dbL (light db), bench, band, pullup, rope, abtr, bodyweight
 function makeEq(equipArr){
   const set=new Set(equipArr||[]);
   return {
     has:function(code){return set.has(code);},
-    // dbEITHER satisfied if any dumbbell present (heavy or light)
     hasDbEither:set.has('dbH')||set.has('dbL'),
     outdoor:set.has('pullup')||set.has('rope')
   };
 }
 function exAllowed(ex,eq){
   if(ex.custom)return true;
-  // outdoor exercises need their specific gear (pullup/rope) which is in the set
-  if(ex.equip.length===0)return true; // bodyweight-only always allowed
+  if(ex.equip.length===0)return true;
   return ex.equip.every(function(code){
     if(code==='dbEITHER')return eq.hasDbEither;
     return eq.has(code);
@@ -600,7 +673,6 @@ function exAllowed(ex,eq){
 
 // =============== PLAN BUILDER ===============
 function buildPlan(cfg){
-  // cfg: {equip:[...],split,muscles,dur,goal,outpos}
   const eq=makeEq(cfg.equip);
   const count=DUR_COUNT[cfg.dur];
   const goal=GOALS[cfg.goal];
@@ -624,30 +696,38 @@ function buildPlan(cfg){
     cands=db.filter(ex=>exAllowed(ex,eq)&&advOK(ex)&&ex.m.some(m=>targets.includes(m))&&(ex.custom||ex.g.includes(cfg.split)));
   }
   const picked=[],used=new Set();
+  const favSet=new Set(S.favEx||[]);
+  function pickOne(pool){
+    if(!pool.length)return null;
+    if(cfg.prefFav){
+      const favs=pool.filter(e=>favSet.has(e.n));
+      if(favs.length&&Math.random()<0.75)return favs[Math.floor(Math.random()*favs.length)];
+    }
+    return pool[Math.floor(Math.random()*pool.length)];
+  }
   const coreEx=cands.filter(e=>e.m.includes('core')&&!e.outdoor);
   const nonCore=cands.filter(e=>!(e.m.length===1&&e.m[0]==='core'));
   targets.forEach(m=>{
     if(m==='core')return;
     const pool=nonCore.filter(e=>e.m.includes(m)&&!used.has(e.n));
-    if(pool.length){const p=pool[Math.floor(Math.random()*pool.length)];picked.push(p);used.add(p.n);}
+    const p=pickOne(pool);
+    if(p){picked.push(p);used.add(p.n);}
   });
   const wantCore=targets.includes('core');
   const mainCount=wantCore?count-1:count;
   let pool2=nonCore.filter(e=>!used.has(e.n));
   while(picked.length<mainCount&&pool2.length){
-    const p=pool2[Math.floor(Math.random()*pool2.length)];picked.push(p);used.add(p.n);
+    const p=pickOne(pool2);if(!p)break;picked.push(p);used.add(p.n);
     pool2=pool2.filter(e=>!used.has(e.n));
   }
   let finisher=null;
-  if(wantCore&&coreEx.length){finisher=coreEx[Math.floor(Math.random()*coreEx.length)];}
-  // split outdoor vs indoor
+  if(wantCore&&coreEx.length){finisher=pickOne(coreEx);}
   const outdoor=picked.filter(e=>e.outdoor);
   const indoor=picked.filter(e=>!e.outdoor);
   return {focusLabel,goal,indoor,outdoor,finisher,cfg};
 }
 
 function warmupFor(targets){
-  // targeted warm-up text
   let parts=[];
   if(targets.includes('shoulders')||targets.includes('chest'))parts.push('Schulterkreisen und Armkreisen');
   if(targets.includes('back'))parts.push('Rumpfrotationen und Katze-Kuh');
@@ -666,9 +746,13 @@ function renderExRow(ex,idx,ctx,star){
   const numCell=star?'<div class="ex-n" style="background:var(--sun);color:var(--ink)">★</div>':`<div class="ex-n">${idx}</div>`;
   const listKey=ex.outdoor?'outdoor':'indoor';
   const enc=encodeURIComponent(ex.n);
+  const isFav=(S.favEx||[]).indexOf(ex.n)!==-1;
+  const note=(S.exComments||{})[ex.n];
+  const favMark=isFav?' <span style="color:var(--sun);">★</span>':'';
+  const noteHtml=note?`<div class="em" style="color:var(--blue);margin-top:3px;">📝 ${note}</div>`:'';
   return `<div class="ex" data-exname="${enc}" data-list="${listKey}">
     ${numCell}
-    <div class="ex-info"><div class="en">${ex.n}</div><div class="em">${ex.cue}</div>
+    <div class="ex-info"><div class="en">${ex.n}${favMark}</div><div class="em">${ex.cue}</div>${noteHtml}
       <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
       <button type="button" class="ex-swap" data-act="swap" data-ex="${enc}" data-list="${listKey}">⟳ tauschen</button>
       <button type="button" class="ex-swap" data-act="hide" data-ex="${enc}" style="border-color:#f0d5d0;color:var(--coral);">✕ sperren</button>
@@ -705,7 +789,6 @@ function renderPlanHtml(plan,ctxId){
   const eqSet=new Set(cfg.equip||[]);
   const isTravel=!eqSet.has('bb')&&!eqSet.has('dbH')&&!eqSet.has('abtr');
   const locTag=isTravel?'🏖️ Reisegepäck':'🏠 Training';
-  // order: warm, then outdoor-first OR outdoor-last
   let body=warmHtml;
   if(outdoor.length&&!cfg.outpos){body+=outHtml+inHtml;}
   else if(outdoor.length&&cfg.outpos){body+=inHtml+outHtml;}
@@ -715,7 +798,6 @@ function renderPlanHtml(plan,ctxId){
   <div class="actions"><button class="act primary" data-act="print">Als PDF / Drucken</button><button class="act" data-act="regen">Neue Variante ⟳</button></div>`;
 }
 
-// swap single exercise - robust: find by name, replace in place
 function doSwap(btn){
   const curName=decodeURIComponent(btn.getAttribute('data-ex'));
   const listKey=btn.getAttribute('data-list');
@@ -748,7 +830,6 @@ function printPlan(){
   const planHtml=out?out.innerHTML:'';
   if(!planHtml||planHtml.indexOf('result-head')===-1){alert('Bitte zuerst einen Plan erstellen.');return;}
   const pa=document.getElementById('printArea');
-  // strip the action buttons from the print copy
   pa.innerHTML='<div style="padding:16px;">'+planHtml+'</div>';
   pa.style.display='block';
   window.print();
@@ -806,14 +887,12 @@ function genProgram(){
       if(['padel','bike1','bike2','walk20','walk45'].includes(cfg.type)){
         weekDays.push({day:d,type:'activity',act:cfg.type});return;
       }
-      // training day
-      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced});
+      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced,prefFav:S.program.prefFav});
       weekDays.push({day:d,type:'training',split:cfg.type,plan,deload:isDeload});
     });
     programData.push({week:w,deload:isDeload,days:weekDays});
   }
   LAST_PROGRAM=programData;
-  // render calendar
   programData.forEach(wd=>{
     html+=`<div class="cal-week"><div class="cal-week-head"><span>Woche ${wd.week}</span>${wd.deload?'<span class="dl">Deload · leichter</span>':''}</div>`;
     wd.days.forEach(dd=>{
@@ -839,7 +918,6 @@ function showProgramDay(week,day){
   const wd=LAST_PROGRAM.find(x=>x.week===week);
   const dd=wd.days.find(x=>x.day===day);
   if(!dd||dd.type!=='training')return;
-  // render plan in an overlay-like block replacing output temporarily
   const html=renderPlanHtml(dd.plan,'prog');
   const modal=document.createElement('div');
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;padding:20px 12px;';
@@ -848,8 +926,6 @@ function showProgramDay(week,day){
   document.body.appendChild(modal);
   var cb=modal.querySelector('#modalClose');
   if(cb)cb.addEventListener('click',function(){modal.remove();});
-  // fix: inside modal, swap/regen data-act still work via global delegation, but regen would target s-output.
-  // disable regen inside modal by removing that button
   var rg=modal.querySelector('[data-act="regen"]');if(rg)rg.style.display='none';
   var pr=modal.querySelector('[data-act="print"]');if(pr)pr.addEventListener('click',function(){window.print();});
 }
@@ -887,7 +963,6 @@ function addMetric(){
 }
 function delMetric(i){S.metrics.splice(i,1);renderMetrics();autoSave();}
 function weeklyAvg(arr,key){
-  // group by ~7 day buckets from most recent
   if(arr.length===0)return[];
   const sorted=[...arr].filter(m=>m[key]!=null).sort((a,b)=>a.d-b.d);
   if(sorted.length===0)return[];
@@ -924,10 +999,8 @@ function renderMetrics(){
     if(kAvg.length>=2){const diff=cur-kAvg[kAvg.length-2];if(diff<-0.2){cls='down';arrow='▼';txt=diff.toFixed(1)+' %';}else if(diff>0.2){cls='up';arrow='▲';txt='+'+diff.toFixed(1)+' %';}}
     trendHtml+=`<div class="trend-box"><div class="mini">Körperfett · Wochendurchschnitt (grober Trend)</div><div class="trend-val">${cur.toFixed(1)} % <span class="trend-arrow ${cls}">${arrow} ${txt}</span></div>${sparkline(kAvg)}</div>`;
   }
-  // honest interpretation
   trendHtml+=interpretTrend(wAvg,kAvg);
   document.getElementById('b-trend').innerHTML=trendHtml;
-  // log list
   const items=[...S.metrics].sort((a,b)=>b.d-a.d).map((m,i)=>{
     const realIdx=S.metrics.indexOf(m);
     const dt=new Date(m.d);const ds=dt.getDate()+'.'+(dt.getMonth()+1)+'.';
@@ -983,6 +1056,78 @@ function renderCustom(){
     return `<div class="custom-item"><span><b>${e.n}</b> · ${e.m.map(m=>nm[m]).join(', ')}${extra}</span><span class="ci-del" data-act="delcustom" data-i="${i}">✕</span></div>`;
   }).join('');
 }
+// ===== ALLE ÜBUNGEN (Übersicht, Favoriten, Kommentare) =====
+let alleFilter={muscle:'all',equip:'all',favonly:false};
+function toggleFav(name){
+  const i=(S.favEx||[]).indexOf(name);
+  if(i===-1)S.favEx.push(name);else S.favEx.splice(i,1);
+  renderAlle();autoSave();
+}
+function saveComment(name,text){
+  if(!S.exComments)S.exComments={};
+  const t=(text||'').trim();
+  if(t)S.exComments[name]=t;else delete S.exComments[name];
+  renderAlle();autoSave();
+}
+function openNoteEdit(enc){
+  const name=decodeURIComponent(enc);
+  const card=document.querySelector('.al-card[data-ex="'+enc+'"]');
+  if(!card)return;
+  const holder=card.querySelector('.al-noteholder');
+  const cur=(S.exComments||{})[name]||'';
+  holder.innerHTML='<div class="al-noteedit"><input type="text" value="'+cur.replace(/"/g,'&quot;')+'" placeholder="Dein Hinweis..." id="noteinput"><button type="button" data-act="savenote" data-ex="'+enc+'">OK</button></div>';
+  const inp=holder.querySelector('#noteinput');if(inp)inp.focus();
+}
+const MNAMES={chest:'Brust',back:'Rücken',shoulders:'Schultern',arms:'Arme',legs:'Beine',core:'Core'};
+const ENAMES={bb:'Langhantel',dbEITHER:'Kurzhantel',dbH:'Kurzhantel schwer',dbL:'Kurzhantel leicht',bench:'Bank',pullup:'Klimmzug',rope:'Battle Rope',abtr:'Bauchtrainer',band:'Band'};
+function exMatchesEquip(ex,ef){
+  if(ef==='all')return true;
+  if(ef==='none')return ex.equip.length===0;
+  if(ef==='dbEITHER')return ex.equip.indexOf('dbEITHER')!==-1||ex.equip.indexOf('dbH')!==-1||ex.equip.indexOf('dbL')!==-1;
+  return ex.equip.indexOf(ef)!==-1;
+}
+function renderAlle(){
+  const list=document.getElementById('al-list');
+  if(!list)return;
+  const db=activeDB();
+  const favSet=new Set(S.favEx||[]);
+  let items=db.filter(function(ex){
+    if(alleFilter.muscle!=='all'&&ex.m.indexOf(alleFilter.muscle)===-1)return false;
+    if(!exMatchesEquip(ex,alleFilter.equip))return false;
+    if(alleFilter.favonly&&!favSet.has(ex.n))return false;
+    return true;
+  });
+  items.sort(function(a,b){
+    const fa=favSet.has(a.n)?0:1,fb=favSet.has(b.n)?0:1;
+    if(fa!==fb)return fa-fb;
+    return a.n.localeCompare(b.n);
+  });
+  document.getElementById('al-count').textContent=items.length+' Übungen';
+  if(items.length===0){list.innerHTML='<div class="empty">Keine Übungen für diese Filter.</div>';return;}
+  list.innerHTML=items.map(function(ex){
+    const enc=encodeURIComponent(ex.n);
+    const isFav=favSet.has(ex.n);
+    const note=(S.exComments||{})[ex.n];
+    let equipTags=ex.equip.length===0?'<span class="al-tag">Körpergewicht</span>':ex.equip.map(function(c){return '<span class="al-tag">'+(ENAMES[c]||c)+'</span>';}).join('');
+    let muscleTags=ex.m.map(function(m){return '<span class="al-tag">'+(MNAMES[m]||m)+'</span>';}).join('');
+    const advTag=ex.adv?'<span class="al-tag adv">fortgeschritten</span>':'';
+    const custTag=ex.custom?'<span class="al-tag" style="background:#EAF5F0;color:var(--green);">eigene</span>':'';
+    const noteBlock=note?'<div class="al-note">📝 '+note+'</div>':'';
+    return '<div class="al-card" data-ex="'+enc+'">'+
+      '<div class="al-head">'+
+        '<div class="al-star'+(isFav?' on':'')+'" data-act="togglefav" data-ex="'+enc+'">'+(isFav?'★':'☆')+'</div>'+
+        '<div class="al-main">'+
+          '<div class="al-name">'+ex.n+'</div>'+
+          '<div class="al-tags">'+muscleTags+equipTags+advTag+custTag+'</div>'+
+          '<div class="al-cue">'+ex.cue+'</div>'+
+          noteBlock+
+          '<div class="al-noteholder"><span class="al-notebtn" data-act="editnote" data-ex="'+enc+'">'+(note?'📝 Hinweis bearbeiten':'📝 Hinweis hinzufügen')+'</span></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
 function renderHidden(){
   const c=document.getElementById('c-hidden');
   if(S.hiddenEx.length===0){c.innerHTML='<div class="empty">Keine gesperrten Übungen.</div>';return;}
@@ -998,6 +1143,10 @@ function saveLocal(){
 function autoSave(){try{localStorage.setItem('trainingStudio',JSON.stringify(S));}catch(e){}}
 function loadLocal(){
   try{const d=localStorage.getItem('trainingStudio');if(d){S=Object.assign(S,JSON.parse(d));}}catch(e){}
+  if(!Array.isArray(S.favEx))S.favEx=[];
+  if(!S.exComments||typeof S.exComments!=='object')S.exComments={};
+  if(!S.single.hasOwnProperty('prefFav'))S.single.prefFav=false;
+  if(!S.program.hasOwnProperty('prefFav'))S.program.prefFav=false;
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
@@ -1010,7 +1159,7 @@ function exportData(){
 function importData(ev){
   const f=ev.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=e=>{try{S=Object.assign(S,JSON.parse(e.target.result));autoSave();initDayConfig();renderCustom();renderHidden();renderMetrics();setStatus('Importiert ✓');}catch(err){setStatus('Import fehlgeschlagen – falsche Datei?',true);}};
+  r.onload=e=>{try{S=Object.assign(S,JSON.parse(e.target.result));autoSave();initDayConfig();renderCustom();renderHidden();renderMetrics();renderAlle();renderEquipGrid('single');renderEquipGrid('program');setStatus('Importiert ✓');}catch(err){setStatus('Import fehlgeschlagen – falsche Datei?',true);}};
   r.readAsText(f);
 }
 function setStatus(msg,err){const s=document.getElementById('d-status');s.textContent=msg;s.style.color=err?'#D95D4E':'#2E8B6E';}
@@ -1020,11 +1169,14 @@ loadLocal();
 initDayConfig();
 renderEquipGrid('single');
 renderEquipGrid('program');
-// restore program selections
 if(S.program.goal){document.querySelectorAll('#p-goalOpts .opt').forEach(o=>o.classList.toggle('sel',o.dataset.goal===S.program.goal));}
 if(S.program.dur){document.querySelectorAll('#p-durOpts .opt').forEach(o=>o.classList.toggle('sel',o.dataset.dur===S.program.dur));}
 document.getElementById('p-weeks').value=S.program.weeks;
 document.getElementById('p-deload').checked=S.program.deload;
+if(document.getElementById('s-preffav'))document.getElementById('s-preffav').checked=!!S.single.prefFav;
+if(document.getElementById('p-preffav'))document.getElementById('p-preffav').checked=!!S.program.prefFav;
+if(document.getElementById('s-advanced'))document.getElementById('s-advanced').checked=!!S.single.advanced;
+if(document.getElementById('p-advanced'))document.getElementById('p-advanced').checked=!!S.program.advanced;
 </script>
 </body>
 </html>
