@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training">
+<meta name="theme-color" content="#0E3A5C">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230E3A5C'/%3E%3Ctext x='90' y='118' font-size='90' text-anchor='middle' fill='%23F2B441' font-family='Arial' font-weight='bold'%3E%F0%9F%8F%8B%3C/text%3E%3C/svg%3E">
+<title>Trainings-Studio · Christoph</title>
+<style>
+:root{
+  --deep:#0E3A5C; --blue:#1B6E9C; --blue-l:#E3EEF5;
+  --stone:#F7F5F0; --ink:#16222B; --sun:#F2B441;
+  --coral:#D95D4E; --green:#2E8B6E; --line:#DDD8CE;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+button,.opt,.tabbtn,.cal-day,.dc-cell,.act,.ex-swap,.hidden-ex-tag,.custom-item .ci-del,.li-del{cursor:pointer;touch-action:manipulation;}
+@supports(padding:max(0px)){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--stone);color:var(--ink);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%;}
+
+.hero{background:linear-gradient(160deg,var(--deep),var(--blue));color:#fff;padding:26px 20px 22px;}
+.hero-inner{max-width:900px;margin:0 auto;}
+.hero .eyebrow{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--sun);font-weight:700;margin-bottom:7px;}
+.hero h1{font-size:clamp(24px,5vw,34px);font-weight:900;text-transform:uppercase;letter-spacing:-.5px;line-height:1.05;}
+.hero h1 .thin{font-weight:300;}
+
+/* TABS */
+.tabbar{position:sticky;top:0;z-index:100;background:var(--stone);border-bottom:1px solid var(--line);}
+.tabbar-inner{max-width:900px;margin:0 auto;display:flex;gap:4px;padding:10px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tabbtn{flex-shrink:0;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.tabbtn.active{background:var(--deep);color:#fff;border-color:var(--deep);}
+
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 70px;}
+.view{display:none;}
+.view.active{display:block;}
+
+.panel{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:18px 18px;margin-bottom:16px;}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:1.3px;color:var(--deep);font-weight:800;margin-bottom:4px;}
+.panel .desc{font-size:12.5px;color:#6B7680;margin-bottom:13px;}
+
+.opt-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;user-select:none;min-height:44px;display:flex;align-items:center;}
+.opt.sel{background:var(--deep);color:#fff;border-color:var(--deep);}
+.opt.sel.green{background:var(--green);border-color:var(--green);}
+.opt.sel.sun{background:var(--sun);color:var(--ink);border-color:var(--sun);}
+.equip-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+@media(max-width:520px){.equip-grid{grid-template-columns:1fr;}}
+.eq-item{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:9px;padding:10px 12px;cursor:pointer;font-size:13px;min-height:44px;user-select:none;}
+.eq-item.on{background:var(--blue-l);border-color:var(--blue);font-weight:600;}
+.eq-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;}
+.eq-item.on .eq-check{background:var(--blue);border-color:var(--blue);}
+
+.mini{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8A94A0;font-weight:700;margin-bottom:7px;}
+.muscle-wrap{margin-top:12px;padding-top:13px;border-top:1px dashed var(--line);}
+
+.toggle-row{display:flex;align-items:center;gap:11px;margin-top:10px;}
+.switch{position:relative;width:48px;height:28px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:28px;transition:.2s;}
+.slider:before{content:"";position:absolute;height:22px;width:22px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+input:checked+.slider{background:var(--green);}
+input:checked+.slider:before{transform:translateX(20px);}
+.toggle-row span{font-size:12.5px;}
+
+.genbtn{width:100%;background:var(--sun);color:var(--ink);border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;box-shadow:0 4px 14px rgba(242,180,65,.4);min-height:52px;}
+.genbtn:active{transform:translateY(1px);}
+.genbtn.blue{background:var(--deep);color:#fff;box-shadow:0 4px 14px rgba(14,58,92,.3);}
+.genbtn.sec{background:#fff;color:var(--deep);border:1.5px solid var(--deep);box-shadow:none;}
+
+.warnbox{background:#FDF3F1;border:1.5px solid var(--coral);border-radius:10px;padding:11px 14px;font-size:12.5px;margin-top:12px;color:#7A3B33;display:none;}
+.warnbox.show{display:block;}
+
+input[type=number],input[type=text],select{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:15px;font-family:inherit;background:#fff;min-height:44px;}
+label.fld{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#8A94A0;font-weight:700;margin:0 0 5px;}
+.fld-row{margin-bottom:12px;}
+
+/* RESULT */
+.result{background:#fff;border:1.5px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.result-head{background:linear-gradient(160deg,var(--deep),var(--blue));color:#fff;padding:18px 20px;}
+.result-head .rtag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sun);font-weight:700;margin-bottom:4px;}
+.result-head h3{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.4px;}
+.result-head .rmeta{font-size:11.5px;color:#CFE3EF;margin-top:5px;}
+
+.pulse{background:#FDF3F1;border-bottom:1.5px solid #f0d5d0;padding:11px 20px;font-size:11.5px;color:#7A3B33;}
+.pulse strong{color:var(--coral);text-transform:uppercase;font-size:9.5px;letter-spacing:1px;display:block;margin-bottom:3px;}
+
+.block{padding:14px 20px;border-bottom:1px solid #EEE9DF;}
+.block:last-child{border-bottom:none;}
+.block-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:#fff;background:var(--blue);display:inline-block;padding:4px 12px;border-radius:6px;margin-bottom:4px;}
+.block-label.warm{background:var(--green);}
+.block-label.fin{background:var(--sun);color:var(--ink);}
+.block-label.out{background:#4A90C2;}
+.block-hint{font-size:11.5px;color:#6B7680;font-style:italic;margin:5px 0 10px;}
+
+.ex{display:flex;gap:11px;padding:9px 0;border-bottom:1px dashed #E8E3D9;align-items:flex-start;}
+.ex:last-child{border-bottom:none;}
+.ex-n{flex-shrink:0;width:26px;height:26px;border-radius:7px;background:var(--deep);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.ex-info{flex:1;min-width:0;}
+.ex-info .en{font-size:14.5px;font-weight:700;color:var(--deep);}
+.ex-info .em{font-size:11px;color:#8A94A0;margin-top:1px;}
+.ex-dose{flex-shrink:0;text-align:right;font-size:10.5px;color:#6B7680;min-width:78px;}
+.ex-dose b{color:var(--deep);font-size:12px;display:block;}
+.ex-swap{background:none;border:1px solid var(--line);border-radius:6px;font-size:14px;padding:3px 8px;cursor:pointer;margin-top:5px;color:var(--blue);min-height:30px;}
+.ex-swap:active{background:var(--blue-l);}
+.ex-weight{margin-top:5px;}
+.ex-weight input{padding:6px 9px;font-size:12.5px;min-height:34px;max-width:150px;}
+
+.actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;}
+.act{flex:1;min-width:130px;border:1.5px solid var(--deep);background:#fff;color:var(--deep);border-radius:10px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.4px;min-height:46px;}
+.act.primary{background:var(--deep);color:#fff;}
+
+.empty{text-align:center;color:#8A94A0;font-size:13px;padding:26px;}
+
+/* CALENDAR */
+.cal-week{background:#fff;border:1.5px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.cal-week-head{background:var(--deep);color:#fff;padding:11px 16px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;}
+.cal-week-head .dl{font-size:9px;background:var(--sun);color:var(--ink);padding:2px 9px;border-radius:10px;letter-spacing:.5px;}
+.cal-day{padding:11px 16px;border-bottom:1px solid #EEE9DF;display:flex;gap:12px;align-items:center;cursor:pointer;}
+.cal-day:last-child{border-bottom:none;}
+.cal-day:active{background:var(--blue-l);}
+.cal-day .cd-day{flex-shrink:0;width:38px;font-size:11px;font-weight:800;text-transform:uppercase;color:#8A94A0;}
+.cal-day .cd-main{flex:1;}
+.cal-day .cd-title{font-size:14px;font-weight:700;color:var(--deep);}
+.cal-day .cd-sub{font-size:11px;color:#8A94A0;}
+.cal-day .cd-icon{flex-shrink:0;font-size:20px;}
+.cal-day.train .cd-title{color:var(--deep);}
+.cal-day.activity .cd-title{color:var(--green);}
+.cal-day.rest{opacity:.65;}
+.cal-day .cd-check{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.cal-day.done .cd-check{background:var(--green);border-color:var(--green);color:#fff;}
+
+.dayconfig{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:10px 0;}
+@media(max-width:640px){.dayconfig{grid-template-columns:repeat(4,1fr);}}
+.dc-cell{border:1.5px solid var(--line);border-radius:9px;padding:8px 5px;text-align:center;cursor:pointer;font-size:11px;}
+.dc-cell .dn{font-weight:800;text-transform:uppercase;font-size:10px;color:#8A94A0;display:block;margin-bottom:3px;}
+.dc-cell .dv{font-size:10px;color:var(--deep);font-weight:700;min-height:26px;display:flex;align-items:center;justify-content:center;}
+.dc-cell.set{background:var(--blue-l);border-color:var(--blue);}
+.dc-cell.act-set{background:#EAF5F0;border-color:var(--green);}
+
+.info{background:var(--blue-l);border:1.5px solid #BFD8E8;border-radius:10px;padding:12px 15px;font-size:12px;margin:11px 0;}
+.info h4{font-size:9.5px;text-transform:uppercase;letter-spacing:1.3px;color:var(--blue);margin-bottom:3px;font-weight:800;}
+.info.green{background:#EAF5F0;border-color:#BFDCCF;}
+.info.green h4{color:var(--green);}
+.info.sun{background:#FFF8EA;border-color:#F0DCAE;}
+.info.sun h4{color:#C68A10;}
+.info.coral{background:#FDF3F1;border-color:#f0d5d0;}
+.info.coral h4{color:var(--coral);}
+
+/* BODY METRICS */
+.metric-add{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;}
+.metric-add .fld-row{flex:1;min-width:110px;margin-bottom:0;}
+.trend-box{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
+.trend-val{font-size:30px;font-weight:900;color:var(--deep);}
+.trend-arrow{font-size:15px;font-weight:800;padding:3px 10px;border-radius:10px;margin-left:8px;}
+.trend-arrow.down{background:#EAF5F0;color:var(--green);}
+.trend-arrow.up{background:#FDF3F1;color:var(--coral);}
+.trend-arrow.flat{background:#f0f0f0;color:#666;}
+canvas{width:100%;height:auto;margin-top:10px;}
+.log-list{margin-top:10px;max-height:180px;overflow-y:auto;}
+.log-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:12.5px;}
+.log-item .li-del{color:var(--coral);cursor:pointer;font-size:12px;}
+
+.footer-note{background:var(--deep);color:#fff;border-radius:12px;padding:15px 18px;font-size:11.5px;line-height:1.6;margin-top:8px;}
+.footer-note strong{color:var(--sun);}
+
+.custom-list{margin-top:12px;}
+.custom-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--stone);border-radius:8px;margin-bottom:6px;font-size:12.5px;}
+.custom-item .ci-del{color:var(--coral);cursor:pointer;font-weight:700;padding:4px 8px;}
+
+.hidden-ex-tag{display:inline-block;background:#FDF3F1;color:var(--coral);border:1px solid #f0d5d0;border-radius:8px;padding:2px 9px;font-size:11px;margin:3px 4px 0 0;cursor:pointer;}
+
+@media print{
+  .hero,.tabbar,.genbtn,.footer-note{display:none!important;}
+  .view{display:none!important;}
+  #printArea{display:block!important;}
+  #printArea .actions{display:none!important;}
+  body{background:#fff;}
+  .result{border:none;page-break-inside:avoid;box-shadow:none;}
+  .ex-swap{display:none!important;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Offline-Studio · ohne Account · iPhone · iPad · Desktop</div>
+    <h1>Trainings-<span class="thin">Studio</span></h1>
+  </div>
+</header>
+
+<nav class="tabbar"><div class="tabbar-inner">
+  <button class="tabbtn active" data-view="single">⚡ Einzelplan</button>
+  <button class="tabbtn" data-view="program">📅 Programm</button>
+  <button class="tabbtn" data-view="body">📈 Körperwerte</button>
+  <button class="tabbtn" data-view="exlib">🏋️ Übungen</button>
+  <button class="tabbtn" data-view="data">💾 Speichern</button>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ============ SINGLE PLAN ============ -->
+<div class="view active" id="view-single">
+  <div class="panel">
+    <h2>1 · Equipment</h2>
+    <p class="desc">Wähle, was verfügbar ist. Schnellwahl setzt die Haken automatisch.</p>
+    <div class="opt-grid" style="margin-bottom:12px;">
+      <div class="opt sel" data-preset="full" data-target="single">🏠 Zuhause komplett</div>
+      <div class="opt" data-preset="travel" data-target="single">🏖️ Nur Reisegepäck</div>
+    </div>
+    <div class="mini">Verfügbares Equipment:</div>
+    <div class="equip-grid" id="s-equipGrid"></div>
+    <div class="warnbox show" id="s-weatherWarn" style="margin-top:12px;">
+      ⚠️ Klimmzugstange &amp; Battle Rope nur draußen bei trockenem Wetter nutzen. Wenn nicht verfügbar, einfach abwählen.
+      <div class="toggle-row" style="margin-top:8px;">
+        <label class="switch"><input type="checkbox" id="s-outpos"><span class="slider"></span></label>
+        <span>Draußen-Block ans <b>Ende</b> setzen (statt Anfang)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>2 · Fokus</h2>
+    <p class="desc">Trainingstyp wählen – oder einzelne Muskelgruppen kombinieren.</p>
+    <div class="opt-grid" id="s-splitOpts">
+      <div class="opt sel" data-split="push">Push</div>
+      <div class="opt" data-split="pull">Pull</div>
+      <div class="opt" data-split="legs">Beine &amp; Core</div>
+      <div class="opt" data-split="full">Ganzkörper</div>
+    </div>
+    <div class="muscle-wrap">
+      <div class="mini">Oder Muskelgruppen kombinieren:</div>
+      <div class="opt-grid" id="s-muscleOpts">
+        <div class="opt" data-m="chest">Brust</div>
+        <div class="opt" data-m="back">Rücken</div>
+        <div class="opt" data-m="shoulders">Schultern</div>
+        <div class="opt" data-m="arms">Arme</div>
+        <div class="opt" data-m="legs">Beine</div>
+        <div class="opt" data-m="core">Core</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>3 · Dauer &amp; Ziel</h2>
+    <div class="mini">Dauer</div>
+    <div class="opt-grid" id="s-durOpts">
+      <div class="opt" data-dur="20">20 Min</div>
+      <div class="opt sel" data-dur="30">30 Min</div>
+      <div class="opt" data-dur="45">45 Min</div>
+      <div class="opt" data-dur="60">60 Min</div>
+    </div>
+    <div class="mini" style="margin-top:13px;">Ziel</div>
+    <div class="opt-grid" id="s-goalOpts">
+      <div class="opt sel green" data-goal="maintain">Erhalt / Definition</div>
+      <div class="opt" data-goal="build">Aufbau</div>
+      <div class="opt" data-goal="strength">Kraft</div>
+    </div>
+    <div class="toggle-row" style="margin-top:15px;">
+      <label class="switch"><input type="checkbox" id="s-pulse" checked><span class="slider"></span></label>
+      <span>Kreislauf-Regeln anzeigen</span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="s-advanced"><span class="slider"></span></label>
+      <span>Fortgeschrittene Übungen einschließen (z.B. Handstand-Liegestütze, Klimmzüge, Sprünge)</span>
+    </div>
+  </div>
+
+  <button type="button" class="genbtn" data-act="gensingle">Plan erstellen ⚡</button>
+  <div id="s-output"><div class="empty">Dein Plan erscheint hier.</div></div>
+</div>
+
+<!-- ============ PROGRAM ============ -->
+<div class="view" id="view-program">
+  <div class="panel">
+    <h2>Mehrwochen-Programm</h2>
+    <p class="desc">Lege fest, an welchen Tagen du was machst – der Planer erstellt daraus einen kompletten Kalender.</p>
+    <div class="fld-row">
+      <label class="fld">Anzahl Wochen</label>
+      <input type="number" id="p-weeks" value="6" min="1" max="16">
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-deload" checked><span class="slider"></span></label>
+      <span>Alle 4 Wochen automatische Deload-Woche (leichter)</span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-advanced"><span class="slider"></span></label>
+      <span>Fortgeschrittene Übungen einschließen</span>
+    </div>
+    <div class="mini" style="margin-top:14px;">Equipment fürs ganze Programm:</div>
+    <div class="opt-grid" style="margin-bottom:10px;">
+      <div class="opt sel" data-preset="full" data-target="program">🏠 Zuhause komplett</div>
+      <div class="opt" data-preset="travel" data-target="program">🏖️ Nur Reisegepäck</div>
+    </div>
+    <div class="equip-grid" id="p-equipGrid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Wochentage belegen</h2>
+    <p class="desc">Tippe auf einen Tag, um ihn einzustellen (Training, Aktivität oder Ruhe).</p>
+    <div class="dayconfig" id="p-dayconfig"></div>
+    <div class="mini" style="margin-top:6px;">Standard-Ziel &amp; Dauer für Trainingstage:</div>
+    <div class="opt-grid" id="p-goalOpts" style="margin-bottom:10px;">
+      <div class="opt sel green" data-goal="maintain">Erhalt</div>
+      <div class="opt" data-goal="build">Aufbau</div>
+      <div class="opt" data-goal="strength">Kraft</div>
+    </div>
+    <div class="opt-grid" id="p-durOpts">
+      <div class="opt" data-dur="20">20</div>
+      <div class="opt sel" data-dur="30">30</div>
+      <div class="opt" data-dur="45">45</div>
+      <div class="opt" data-dur="60">60</div>
+    </div>
+  </div>
+
+  <button type="button" class="genbtn blue" data-act="genprogram">Programm erstellen 📅</button>
+  <div id="p-output"></div>
+</div>
+
+<!-- ============ BODY ============ -->
+<div class="view" id="view-body">
+  <div class="panel">
+    <h2>Körperwerte</h2>
+    <p class="desc">Gewicht morgens nüchtern eintragen. Das Tool zeigt den Wochentrend – der zählt, nicht der Tageswert.</p>
+    <div class="metric-add">
+      <div class="fld-row"><label class="fld">Gewicht (kg)</label><input type="number" id="b-weight" step="0.1" placeholder="75.4"></div>
+      <div class="fld-row"><label class="fld">KFA % (optional)</label><input type="number" id="b-kfa" step="0.1" placeholder="16.0"></div>
+      <button type="button" class="act primary" style="flex:0 0 auto;" data-act="addmetric">Eintragen</button>
+    </div>
+  </div>
+  <div id="b-trend"></div>
+  <div class="panel">
+    <h2>Verlauf</h2>
+    <div class="log-list" id="b-log"><div class="empty">Noch keine Einträge.</div></div>
+  </div>
+</div>
+
+<!-- ============ EXERCISE LIBRARY ============ -->
+<div class="view" id="view-exlib">
+  <div class="panel">
+    <h2>Eigene Übung anlegen</h2>
+    <p class="desc">Ergänze Übungen, die dir liegen. Sie erscheinen dann im Generator.</p>
+    <div class="fld-row"><label class="fld">Name</label><input type="text" id="c-name" placeholder="z.B. Kettlebell Swing"></div>
+    <div class="fld-row"><label class="fld">Muskelgruppe(n)</label>
+      <div class="opt-grid" id="c-muscles">
+        <div class="opt" data-m="chest">Brust</div><div class="opt" data-m="back">Rücken</div>
+        <div class="opt" data-m="shoulders">Schultern</div><div class="opt" data-m="arms">Arme</div>
+        <div class="opt" data-m="legs">Beine</div><div class="opt" data-m="core">Core</div>
+      </div>
+    </div>
+    <div class="fld-row"><label class="fld">Hinweis zur Ausführung</label><input type="text" id="c-cue" placeholder="Kurzer Ausführungshinweis"></div>
+    <div style="display:flex;gap:10px;">
+      <div class="fld-row" style="flex:1;"><label class="fld">Sätze</label><input type="number" id="c-sets" value="3" min="1" max="10"></div>
+      <div class="fld-row" style="flex:1;"><label class="fld">Wiederholungen</label><input type="text" id="c-reps" placeholder="z.B. 12 oder 8–12"></div>
+    </div>
+    <div class="toggle-row" style="margin-bottom:12px;">
+      <label class="switch"><input type="checkbox" id="c-adv"><span class="slider"></span></label>
+      <span>Fortgeschrittene Übung</span>
+    </div>
+    <button type="button" class="act primary" data-act="addcustom">Übung hinzufügen</button>
+    <div class="custom-list" id="c-list"></div>
+  </div>
+  <div class="panel">
+    <h2>Gesperrte Übungen</h2>
+    <p class="desc">Übungen, die im Generator nicht mehr auftauchen sollen. Tippe zum Entsperren.</p>
+    <div id="c-hidden"><div class="empty">Keine gesperrten Übungen.</div></div>
+  </div>
+</div>
+
+<!-- ============ DATA ============ -->
+<div class="view" id="view-data">
+  <div class="panel">
+    <h2>Speichern &amp; Exportieren</h2>
+    <div class="info sun"><h4>Wichtig für iPhone / iPad</h4>Safari kann lokal gespeicherte Daten nach einiger Zeit löschen. Nutze deshalb regelmäßig <strong>„Exportieren"</strong> und sichere die Datei in <strong>Dateien / iCloud</strong>. So geht nichts verloren.</div>
+    <div class="actions" style="margin-top:0;">
+      <button type="button" class="act primary" data-act="savelocal">Im Browser speichern</button>
+      <button type="button" class="act" data-act="export">Exportieren (Datei)</button>
+    </div>
+    <div class="fld-row" style="margin-top:14px;">
+      <label class="fld">Importieren (exportierte Datei laden)</label>
+      <input type="file" id="d-import" accept=".json" onchange="importData(event)">
+    </div>
+    <div id="d-status" style="font-size:12.5px;color:var(--green);margin-top:8px;"></div>
+  </div>
+  <div class="panel">
+    <h2>So nutzt du das Tool dauerhaft</h2>
+    <div class="footer-note" style="margin-top:0;">
+      <strong>iPhone/iPad:</strong> Datei in „Dateien" (iCloud Drive) ablegen, mit Safari öffnen. Zum Home-Bildschirm hinzufügen: Teilen-Symbol → „Zum Home-Bildschirm". Dann startet es wie eine App.<br><br>
+      <strong>Als PDF sichern/drucken:</strong> Erst einen Plan erstellen, dann Teilen → Drucken → mit zwei Fingern auf die Vorschau ziehen → Teilen → „In Dateien sichern".<br><br>
+      <strong>Regelmäßig exportieren</strong> ist die sicherste Methode, damit deine Programme und Körperwerte erhalten bleiben.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="printArea" style="display:none;"></div>
+
+<script>
+
+
+
+// ---- Delegated action handling (click + touch, iOS-robust) ----
+function handleAction(el){
+  if(!el)return;
+  var act=el.getAttribute('data-act');
+  if(act==='swap'){doSwap(el);}
+  else if(act==='hide'){hideEx(el.getAttribute('data-ex'));}
+  else if(act==='print'){printPlan();}
+  else if(act==='regen'){genSingle();}
+  else if(act==='printweek'){printWeek(parseInt(el.getAttribute('data-week')));}
+  else if(act==='openday'){showProgramDay(parseInt(el.getAttribute('data-week')),el.getAttribute('data-day'));}
+  else if(act==='addcustom'){addCustom();}
+  else if(act==='delcustom'){delCustom(parseInt(el.getAttribute('data-i')));}
+  else if(act==='unhide'){unhide(el.getAttribute('data-ex'));}
+  else if(act==='addmetric'){addMetric();}
+  else if(act==='delmetric'){delMetric(parseInt(el.getAttribute('data-i')));}
+  else if(act==='savelocal'){saveLocal();}
+  else if(act==='export'){exportData();}
+  else if(act==='gensingle'){genSingle();}
+  else if(act==='genprogram'){genProgram();}
+}
+// equipment toggles + presets via delegation
+document.addEventListener('click',function(ev){
+  var t=ev.target.closest('[data-eqtoggle]');
+  if(t){ev.preventDefault();toggleEquip(t.getAttribute('data-eqtarget'),t.getAttribute('data-eqtoggle'));return;}
+  var p=ev.target.closest('[data-preset]');
+  if(p){ev.preventDefault();
+    var tgt=p.getAttribute('data-target');
+    applyPreset(tgt,p.getAttribute('data-preset'));
+    // visual sel state on preset buttons
+    var parent=p.parentElement;
+    parent.querySelectorAll('[data-preset]').forEach(function(x){x.classList.remove('sel');});
+    p.classList.add('sel');
+  }
+});
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest('[data-act]');
+  if(el){ev.preventDefault();handleAction(el);}
+});
+
+// =============== EXERCISE DB ===============
+const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", "full"], "equip": ["dbEITHER", "bench"], "cue": "Schulterblätter zusammen, Ellbogen 45°, kontrolliert runter, explosiv hoch.", "outdoor": false, "adv": false}, {"n": "Langhantel-Bankdrücken", "m": ["chest"], "g": ["push", "full"], "equip": ["bb", "bench"], "cue": "Stange zur unteren Brust, Handgelenke gerade, Füße fest am Boden.", "outdoor": false, "adv": false}, {"n": "KH-Schrägbankdrücken", "m": ["chest", "shoulders"], "g": ["push", "full"], "equip": ["dbEITHER", "bench"], "cue": "Bank leicht erhöht oder Schultern erhöht. Trifft die obere Brust.", "outdoor": false, "adv": false}, {"n": "KH-Negativ-Bankdrücken", "m": ["chest"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Kopf leicht tiefer als Hüfte. Betont die untere Brust.", "outdoor": false, "adv": false}, {"n": "KH-Fliegende", "m": ["chest"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Leicht gebeugte Arme, weiter Bogen, Dehnung in der Brust spüren.", "outdoor": false, "adv": false}, {"n": "KH-Schräg-Fliegende", "m": ["chest", "shoulders"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Auf Schrägbank, weiter Bogen. Obere Brust und Dehnung.", "outdoor": false, "adv": false}, {"n": "Liegestütze", "m": ["chest", "arms"], "g": ["push", "full"], "equip": [], "cue": "Körper gerade, Bauch fest, Ellbogen 45° zum Körper.", "outdoor": false, "adv": false}, {"n": "Liegestütze (Füße erhöht)", "m": ["chest", "shoulders"], "g": ["push", "full"], "equip": ["bench"], "cue": "Füße auf Bank/Stuhl, Brust tief. Betont obere Brust und Schulter.", "outdoor": false, "adv": false}, {"n": "Liegestütze (eng/Diamant)", "m": ["chest", "arms"], "g": ["push", "full"], "equip": [], "cue": "Hände eng unter der Brust. Mehr Trizeps und innere Brust.", "outdoor": false, "adv": false}, {"n": "Liegestütze (breit)", "m": ["chest"], "g": ["push", "full"], "equip": [], "cue": "Hände weiter als schulterbreit. Mehr äußere Brust.", "outdoor": false, "adv": false}, {"n": "Archer-Liegestütze", "m": ["chest", "arms"], "g": ["push"], "equip": [], "cue": "Gewicht auf eine Seite verlagern, ein Arm streckt. Fortgeschritten.", "outdoor": false, "adv": true}, {"n": "KH-Überzüge (Pullover)", "m": ["chest", "back"], "g": ["push", "pull"], "equip": ["dbH", "bench"], "cue": "Liegend, Hantel weit über den Kopf, Brustkorb-Dehnung. Langsam.", "outdoor": false, "adv": false}, {"n": "Band-Brustpresse", "m": ["chest"], "g": ["push", "full"], "equip": ["band"], "cue": "Band hinter dem Rücken, nach vorne pressen. Spannung halten.", "outdoor": false, "adv": false}, {"n": "Deficit-Liegestütze", "m": ["chest"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Hände auf zwei Hanteln, tiefer absenken. Größere Bewegungsamplitude.", "outdoor": false, "adv": true}, {"n": "Klimmzüge (Obergriff)", "m": ["back"], "g": ["pull", "full"], "equip": ["pullup"], "cue": "Breiter Obergriff, Brust zur Stange, unten voll ausstrecken.", "outdoor": true, "adv": true}, {"n": "Klimmzüge (Untergriff)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["pullup"], "cue": "Untergriff = mehr Lat und Bizeps. Schulterblätter unten einziehen.", "outdoor": true, "adv": true}, {"n": "Klimmzüge (neutral/eng)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["pullup"], "cue": "Neutraler Griff, gelenkschonend. Voller Bewegungsradius.", "outdoor": true, "adv": true}, {"n": "Negativ-Klimmzüge", "m": ["back"], "g": ["pull"], "equip": ["pullup"], "cue": "Oben starten, langsam 3-5 Sek. runter. Für Kraftaufbau am Klimmzug.", "outdoor": true, "adv": true}, {"n": "KH-Rudern vorgebeugt (beidarmig)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["dbH"], "cue": "Rücken gerade, 45° vor, Hanteln zum Bauchnabel, Schulterblätter zusammen.", "outdoor": false, "adv": false}, {"n": "Einarmiges KH-Rudern", "m": ["back"], "g": ["pull"], "equip": ["dbH", "bench"], "cue": "Auf Bank/Stuhl abstützen, Ellbogen eng zur Hüfte ziehen.", "outdoor": false, "adv": false}, {"n": "Langhantel-Rudern", "m": ["back"], "g": ["pull", "full"], "equip": ["bb"], "cue": "Hüfthinge, Stange zum unteren Bauch, Rücken neutral.", "outdoor": false, "adv": false}, {"n": "Langhantel-Rudern (Untergriff)", "m": ["back", "arms"], "g": ["pull"], "equip": ["bb"], "cue": "Untergriff betont unteren Lat und Bizeps stärker.", "outdoor": false, "adv": false}, {"n": "KH-Rudern (weiter Ellbogen)", "m": ["back"], "g": ["pull"], "equip": ["dbH"], "cue": "Ellbogen weit außen = mehr oberer Rücken und hintere Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Straight-Arm-Pulldown", "m": ["back"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Vorgebeugt, gestreckte Arme nach hinten führen. Isoliert den Lat.", "outdoor": false, "adv": false}, {"n": "Band-Rudern", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["band"], "cue": "Band fixieren, Ellbogen eng nach hinten, Schulterblätter zusammen.", "outdoor": false, "adv": false}, {"n": "Band-Lat-Pulldown", "m": ["back"], "g": ["pull", "full"], "equip": ["band"], "cue": "Band hoch fixieren, gestreckt nach unten ziehen. Lat-Fokus.", "outdoor": false, "adv": false}, {"n": "Superman-Hold", "m": ["back"], "g": ["pull", "legs"], "equip": [], "cue": "Bauchlage, Arme/Beine heben, unteren Rücken aktivieren, halten.", "outdoor": false, "adv": false}, {"n": "Superman-Rudern (W-Zug)", "m": ["back"], "g": ["pull"], "equip": [], "cue": "Bauchlage, Arme wie beim Rudern nach hinten ziehen, oben halten.", "outdoor": false, "adv": false}, {"n": "Reverse Snow Angel", "m": ["back", "shoulders"], "g": ["pull"], "equip": [], "cue": "Bauchlage, Arme flach am Boden kreisen. Oberer Rücken, Haltung.", "outdoor": false, "adv": false}, {"n": "Umgekehrtes Rudern (unter Tisch/Stange)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["bench"], "cue": "Unter stabilem Tisch/Stange, Körper gerade, Brust zur Kante ziehen.", "outdoor": false, "adv": false}, {"n": "KH-Schulterdrücken (stehend)", "m": ["shoulders", "arms"], "g": ["push", "full"], "equip": ["dbEITHER"], "cue": "Kein Hohlkreuz, über den Kopf drücken, Bauch fest. Nie Luft anhalten.", "outdoor": false, "adv": false}, {"n": "KH-Schulterdrücken (sitzend)", "m": ["shoulders", "arms"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Auf Bank mit Rückenlehne, saubere Bahn über den Kopf.", "outdoor": false, "adv": false}, {"n": "Langhantel-Schulterdrücken", "m": ["shoulders"], "g": ["push"], "equip": ["bb"], "cue": "Stange von der Brust über den Kopf, Rumpf stabil, kein Zurücklehnen.", "outdoor": false, "adv": false}, {"n": "Arnold-Press", "m": ["shoulders"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Aus gedrehter Position hochdrücken und drehen. Ganze Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Seitheben", "m": ["shoulders"], "g": ["push", "full"], "equip": ["dbEITHER"], "cue": "Arme leicht gebeugt bis Schulterhöhe, langsam senken. Seitliche Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Seitheben (vorgebeugt)", "m": ["shoulders", "back"], "g": ["pull", "push"], "equip": ["dbEITHER"], "cue": "45° vor, Arme seitlich. Hintere Schulter für die runde Optik.", "outdoor": false, "adv": false}, {"n": "KH-Frontheben", "m": ["shoulders"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Gestreckte Arme nach vorne bis Schulterhöhe. Vordere Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Aufrechtes Rudern", "m": ["shoulders", "back"], "g": ["pull", "push"], "equip": ["dbEITHER"], "cue": "Hanteln eng am Körper zum Kinn ziehen, Ellbogen führen.", "outdoor": false, "adv": false}, {"n": "Pike Push-up", "m": ["shoulders", "chest"], "g": ["push", "full"], "equip": [], "cue": "Hüfte hoch (umgekehrtes V), Kopf Richtung Boden. Schulterlast.", "outdoor": false, "adv": false}, {"n": "Handstand-Push-up (an Wand)", "m": ["shoulders"], "g": ["push"], "equip": [], "cue": "An der Wand, kontrolliert absenken. Nur für Fortgeschrittene.", "outdoor": false, "adv": true}, {"n": "Band-Seitheben", "m": ["shoulders"], "g": ["push", "full"], "equip": ["band"], "cue": "Auf Band stehen, seitlich bis Schulterhöhe, langsam zurück.", "outdoor": false, "adv": false}, {"n": "Band-Face-Pull", "m": ["shoulders", "back"], "g": ["pull", "full"], "equip": ["band"], "cue": "Band auf Kopfhöhe, zum Gesicht ziehen, Ellbogen hoch. Hintere Schulter.", "outdoor": false, "adv": false}, {"n": "Langhantel-Frontheben", "m": ["shoulders"], "g": ["push"], "equip": ["bb"], "cue": "Stange gestreckt bis Schulterhöhe heben. Kein Schwung.", "outdoor": false, "adv": false}, {"n": "KH-Bizeps-Curls (Supination)", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Ellbogen fixiert, oben Handfläche drehen, kein Schwung.", "outdoor": false, "adv": false}, {"n": "KH-Hammer-Curls", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Neutraler Griff, Unterarm und Bizeps. Kontrolliert.", "outdoor": false, "adv": false}, {"n": "KH-Konzentrations-Curls", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER", "bench"], "cue": "Sitzend, Ellbogen am Oberschenkel, isolierter Bizeps.", "outdoor": false, "adv": false}, {"n": "Langhantel-Curls", "m": ["arms"], "g": ["pull"], "equip": ["bb"], "cue": "Schulterbreiter Untergriff, Ellbogen am Körper, kein Schwung.", "outdoor": false, "adv": false}, {"n": "KH-Curls (schräg liegend)", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER", "bench"], "cue": "Auf Schrägbank, Arme hängen. Maximale Bizeps-Dehnung.", "outdoor": false, "adv": false}, {"n": "Trizeps-Dips (Stuhl/Bank)", "m": ["arms"], "g": ["push", "full"], "equip": ["bench"], "cue": "Hände auf Kante, Ellbogen nach hinten, tief absenken.", "outdoor": false, "adv": false}, {"n": "KH-Trizeps-Kickbacks", "m": ["arms"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Oberarm waagrecht fixieren, voll strecken, kurz halten.", "outdoor": false, "adv": false}, {"n": "KH-Überkopf-Trizeps", "m": ["arms"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Eine Hantel beidhändig hinter den Kopf, strecken. Langer Kopf.", "outdoor": false, "adv": false}, {"n": "Langhantel-Stirndrücken", "m": ["arms"], "g": ["push"], "equip": ["bb", "bench"], "cue": "Liegend, Stange zur Stirn absenken, strecken. Trizeps-Isolation.", "outdoor": false, "adv": false}, {"n": "Enge Liegestütze", "m": ["arms", "chest"], "g": ["push", "full"], "equip": [], "cue": "Hände eng, Ellbogen am Körper. Trizeps-lastiger Push.", "outdoor": false, "adv": false}, {"n": "Band-Curls", "m": ["arms"], "g": ["pull", "full"], "equip": ["band"], "cue": "Auf Band stehen, curlen, Spannung oben halten.", "outdoor": false, "adv": false}, {"n": "Band-Trizeps-Drücken", "m": ["arms"], "g": ["push", "full"], "equip": ["band"], "cue": "Band hoch fixieren, nach unten strecken. Trizeps.", "outdoor": false, "adv": false}, {"n": "KH-Zottman-Curls", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Hoch supiniert, gedreht pronierend senken. Bizeps + Unterarm.", "outdoor": false, "adv": false}, {"n": "Goblet Squats", "m": ["legs", "core"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Hantel vor der Brust, tief in die Hocke, Fersen am Boden.", "outdoor": false, "adv": false}, {"n": "Langhantel-Kniebeugen", "m": ["legs", "core"], "g": ["legs", "full"], "equip": ["bb"], "cue": "Stange auf oberem Rücken, Hüfte nach hinten, tief, kontrolliert.", "outdoor": false, "adv": false}, {"n": "Langhantel-Frontkniebeugen", "m": ["legs", "core"], "g": ["legs"], "equip": ["bb"], "cue": "Stange auf der vorderen Schulter, aufrechter Oberkörper. Quadrizeps.", "outdoor": false, "adv": false}, {"n": "KH-Ausfallschritte (rückwärts)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Schritt zurück, hinteres Knie fast zum Boden, knieschonend.", "outdoor": false, "adv": false}, {"n": "KH-Ausfallschritte (vorwärts)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Schritt nach vorne, tief, über die Ferse zurückdrücken.", "outdoor": false, "adv": false}, {"n": "KH-Ausfallschritte (gehend)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Gehend durch den Raum, abwechselnd. Beine und Balance.", "outdoor": false, "adv": false}, {"n": "Bulgarian Split Squat", "m": ["legs"], "g": ["legs"], "equip": ["dbEITHER", "bench"], "cue": "Hinterer Fuß erhöht, tief absenken. Ein Bein, hohe Intensität.", "outdoor": false, "adv": true}, {"n": "Rumänisches KH-Kreuzheben", "m": ["legs", "back"], "g": ["legs", "pull", "full"], "equip": ["dbH"], "cue": "Hüfthinge, Rücken gerade, Hanteln eng am Bein. Hintere Kette.", "outdoor": false, "adv": false}, {"n": "Langhantel-Kreuzheben", "m": ["legs", "back"], "g": ["legs", "pull"], "equip": ["bb"], "cue": "Stange eng am Schienbein, Rücken neutral, aus der Hüfte strecken.", "outdoor": false, "adv": false}, {"n": "Rumänisches Langhantel-Kreuzheben", "m": ["legs", "back"], "g": ["legs", "pull"], "equip": ["bb"], "cue": "Betonte Dehnung der hinteren Oberschenkel, Knie leicht gebeugt.", "outdoor": false, "adv": false}, {"n": "KH-Sumo-Squat", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbH"], "cue": "Breiter Stand, Zehen nach außen, eine Hantel senkrecht halten. Innenschenkel.", "outdoor": false, "adv": false}, {"n": "Glute Bridges", "m": ["legs", "core"], "g": ["legs", "full"], "equip": [], "cue": "Rückenlage, Hüfte hoch, oben Gesäß anspannen.", "outdoor": false, "adv": false}, {"n": "Glute Bridges (einbeinig)", "m": ["legs", "core"], "g": ["legs"], "equip": [], "cue": "Ein Bein gestreckt, Hüfte hoch. Mehr Intensität pro Seite.", "outdoor": false, "adv": false}, {"n": "Hip Thrust (mit KH)", "m": ["legs"], "g": ["legs"], "equip": ["dbH", "bench"], "cue": "Schultern auf Bank, Hantel auf der Hüfte, hoch drücken. Gesäß.", "outdoor": false, "adv": false}, {"n": "Wadenheben (mit KH)", "m": ["legs"], "g": ["legs"], "equip": ["dbEITHER"], "cue": "Auf Fußballen hoch, oben halten, langsam senken.", "outdoor": false, "adv": false}, {"n": "Wadenheben (einbeinig)", "m": ["legs"], "g": ["legs"], "equip": ["dbEITHER"], "cue": "Ein Bein, volle Amplitude. Mehr Reiz pro Wade.", "outdoor": false, "adv": false}, {"n": "Air Squats", "m": ["legs"], "g": ["legs", "full"], "equip": [], "cue": "Körpergewicht, tief und kontrolliert. Für hohe Wiederholungen.", "outdoor": false, "adv": false}, {"n": "Sprungkniebeugen", "m": ["legs", "core"], "g": ["legs", "full"], "equip": [], "cue": "Explosiv hochspringen, weich landen. Nur wenn Kreislauf stabil.", "outdoor": false, "adv": true}, {"n": "Wall Sit", "m": ["legs"], "g": ["legs"], "equip": [], "cue": "An der Wand, Oberschenkel waagrecht, halten. Statische Ausdauer.", "outdoor": false, "adv": false}, {"n": "Step-ups (auf Bank/Stuhl)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER", "bench"], "cue": "Auf erhöhte Fläche steigen, über die Ferse hochdrücken.", "outdoor": false, "adv": false}, {"n": "KH-Kreuzheben einbeinig", "m": ["legs", "back", "core"], "g": ["legs", "pull"], "equip": ["dbH"], "cue": "Auf einem Bein, Hüfthinge, Balance. Hintere Kette und Rumpf.", "outdoor": false, "adv": false}, {"n": "Unterarmstütz (Plank)", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": [], "cue": "Gerade Linie, Bauch/Gesäß fest, ruhig weiteratmen.", "outdoor": false, "adv": false}, {"n": "Seitlicher Unterarmstütz", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Seitlage auf Unterarm, Hüfte hoch, halten. Seitliche Rumpfwand.", "outdoor": false, "adv": false}, {"n": "Plank mit Schulter-Tap", "m": ["core", "shoulders"], "g": ["full", "push"], "equip": [], "cue": "Im Plank abwechselnd Schulter antippen, Hüfte ruhig halten.", "outdoor": false, "adv": false}, {"n": "Dead Bug", "m": ["core"], "g": ["legs", "full", "pull"], "equip": [], "cue": "Gegenarm/-bein strecken, unterer Rücken am Boden. Langsam.", "outdoor": false, "adv": false}, {"n": "Hollow Body Hold", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Arme/Beine gestreckt, unterer Rücken flach. Tiefe Rumpfspannung.", "outdoor": false, "adv": false}, {"n": "Reverse Crunch", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Becken von unten aufrollen, Unterbauch. Kontrolliert.", "outdoor": false, "adv": false}, {"n": "Käfer / Bicycle Crunch", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Ellbogen zum gegenüberliegenden Knie, langsam. Schräge Bauchwand.", "outdoor": false, "adv": false}, {"n": "Beinheben (liegend)", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Beine gestreckt heben/senken, unteren Rücken andrücken.", "outdoor": false, "adv": false}, {"n": "Russian Twist (mit KH)", "m": ["core"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Sitzend, Oberkörper zurück, Gewicht seitlich. Schräge Bauchwand.", "outdoor": false, "adv": false}, {"n": "KH-Woodchopper", "m": ["core"], "g": ["push", "pull", "full"], "equip": ["dbEITHER"], "cue": "Diagonal von unten nach oben, schräge Bauchmuskeln. Explosiv.", "outdoor": false, "adv": false}, {"n": "Suitcase Carry", "m": ["core", "legs"], "g": ["legs", "full", "pull"], "equip": ["dbH"], "cue": "Eine schwere Hantel, aufrecht gehen. Leiste und Rumpf.", "outdoor": false, "adv": false}, {"n": "Farmer's Walk", "m": ["core", "legs", "back"], "g": ["legs", "full", "pull"], "equip": ["dbH"], "cue": "Zwei schwere Hanteln, aufrecht gehen. Ganzkörper-Stabilität.", "outdoor": false, "adv": false}, {"n": "Mountain Climbers", "m": ["core"], "g": ["full", "legs"], "equip": [], "cue": "Knie im Wechsel zur Brust, Hüfte tief. Tempo nach Kondition.", "outdoor": false, "adv": false}, {"n": "Slow Mountain Climbers", "m": ["core"], "g": ["full", "legs"], "equip": [], "cue": "Knie langsam (3 Sek.) zur Brust. Tiefer Hüftbeuger, kontrolliert.", "outdoor": false, "adv": false}, {"n": "Kopenhagen-Plank", "m": ["core", "legs"], "g": ["legs", "full"], "equip": ["bench"], "cue": "Oberes Bein auf Bank, Hüfte hoch. Adduktoren für Padel.", "outdoor": false, "adv": true}, {"n": "Hohlkreuz-Beinheben (Toes-to-Bar-Style)", "m": ["core"], "g": ["legs"], "equip": ["pullup"], "cue": "An der Stange hängend Knie/Beine heben. Unterbauch.", "outdoor": true, "adv": true}, {"n": "Plank Reach", "m": ["core", "shoulders"], "g": ["full"], "equip": [], "cue": "Im Plank Arm nach vorne strecken, Hüfte stabil. Anti-Rotation.", "outdoor": false, "adv": false}, {"n": "Battle Rope Waves", "m": ["shoulders", "core", "arms"], "g": ["push", "pull", "legs", "full"], "equip": ["rope"], "cue": "Kräftige Wellen, Knie leicht gebeugt, Rumpf fest. Kondition.", "outdoor": true, "adv": false}, {"n": "Battle Rope Slams", "m": ["core", "shoulders"], "g": ["full", "legs", "push"], "equip": ["rope"], "cue": "Über den Kopf, kraftvoll runterschlagen. Ganzkörper-Finisher.", "outdoor": true, "adv": false}, {"n": "Battle Rope Wechsel-Wellen", "m": ["shoulders", "arms", "core"], "g": ["push", "pull", "full"], "equip": ["rope"], "cue": "Arme alternierend, konstanter Rhythmus. Ausdauer für Schultern.", "outdoor": true, "adv": false}, {"n": "Burpees", "m": ["chest", "legs", "core"], "g": ["full", "legs", "push"], "equip": [], "cue": "Liegestütz + Sprung. Ganzkörper. Nur bei stabilem Kreislauf.", "outdoor": false, "adv": true}, {"n": "Hampelmänner", "m": ["legs", "shoulders"], "g": ["full", "legs"], "equip": [], "cue": "Klassisch, lockeres Tempo. Gutes Warm-up oder Finisher.", "outdoor": false, "adv": false}, {"n": "High Knees", "m": ["legs", "core"], "g": ["full", "legs"], "equip": [], "cue": "Knie hoch, zügiges Tempo am Stand. Kondition.", "outdoor": false, "adv": false}, {"n": "Crunches auf dem Bauchtrainer", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": ["abtr"], "cue": "Auf der Bank, Oberkörper kontrolliert einrollen, Bauch anspannen. Schwierigkeit über Neigung wählen.", "outdoor": false, "adv": false}, {"n": "Sit-ups auf dem Bauchtrainer", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": ["abtr"], "cue": "Voller Sit-up mit fixierten Beinen, kontrolliert hoch und runter.", "outdoor": false, "adv": false}, {"n": "Seitliche Crunches (Bauchtrainer)", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": ["abtr"], "cue": "Seitlich eingedreht einrollen, schräge Bauchmuskeln. Beide Seiten.", "outdoor": false, "adv": false}, {"n": "Rückenstrecker / Hyperextension (Bauchtrainer)", "m": ["back"], "g": ["pull", "legs", "full"], "equip": ["abtr"], "cue": "Bauchlage-Position, Oberkörper aus der Hüfte heben, unteren Rücken kräftigen. Nicht überstrecken.", "outdoor": false, "adv": false}, {"n": "Negativ-Crunch (Bauchtrainer, steilere Stufe)", "m": ["core"], "g": ["legs", "full"], "equip": ["abtr"], "cue": "Höhere Neigungsstufe für mehr Widerstand. Langsam ablassen.", "outdoor": false, "adv": true}];
+
+// =============== STATE ===============
+let S = {
+  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'30',goal:'maintain',outpos:false,pulse:true,advanced:false},
+  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'30',days:{},advanced:false},
+  customEx:[],
+  hiddenEx:[],
+  metrics:[],
+  progWeights:{}
+};
+const DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+const DAYFULL = {Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag',So:'Sonntag'};
+
+const GOALS = {
+  maintain:{sets:"3",reps:"12–15",rest:"45–60 Sek.",label:"Erhalt / Definition",note:"Moderate Gewichte, saubere Technik, kurze Pausen. Volumen hält die Muskeln, das Defizit kommt aus der Ernährung."},
+  build:{sets:"4",reps:"8–12",rest:"60–90 Sek.",label:"Aufbau",note:"Progressive Belastung: Gewicht steigern, wenn das obere Wiederholungsziel sauber erreicht wird."},
+  strength:{sets:"5",reps:"4–6",rest:"2–3 Min.",label:"Kraft",note:"Schwere Gewichte, längere Pausen. Perfekte Technik, im Defizit nicht bis zum Muskelversagen."}
+};
+const DUR_COUNT = {"20":4,"30":5,"45":6,"60":8};
+const ACTIVITIES = {
+  padel:{t:"Padel",sub:"ca. 1,5 h · zählt als Cardio + Beine",icon:"🎾"},
+  bike1:{t:"Radfahren 1 h",sub:"Zone 2 Grundlage",icon:"🚴"},
+  bike2:{t:"Radfahren 2 h",sub:"längere Ausdauer",icon:"🚴"},
+  walk20:{t:"Spazieren 20 Min",sub:"aktive Erholung",icon:"🚶"},
+  walk45:{t:"Spazieren 45 Min",sub:"lockere Bewegung",icon:"🚶"},
+  rest:{t:"Ruhetag",sub:"Erholung",icon:"😴"}
+};
+
+function activeDB(){
+  const custom = S.customEx.map(c=>({...c,custom:true}));
+  return [...BASE_DB,...custom].filter(e=>!S.hiddenEx.includes(e.n));
+}
+
+// =============== TABS ===============
+document.querySelectorAll('.tabbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tabbtn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('view-'+b.dataset.view).classList.add('active');
+    if(b.dataset.view==='exlib'){renderCustom();renderHidden();}
+    if(b.dataset.view==='body'){renderMetrics();}
+    window.scrollTo({top:0});
+  });
+});
+
+// =============== OPTION WIRING ===============
+function wireSingle(cid,key){
+  document.querySelectorAll('#'+cid+' .opt').forEach(el=>{
+    el.addEventListener('click',()=>{
+      if(cid==='s-muscleOpts'){
+        el.classList.toggle('sel');
+        const m=el.dataset.m;
+        if(el.classList.contains('sel'))S.single.muscles.push(m);
+        else S.single.muscles=S.single.muscles.filter(x=>x!==m);
+        if(S.single.muscles.length>0)document.querySelectorAll('#s-splitOpts .opt').forEach(s=>s.classList.remove('sel'));
+        return;
+      }
+      document.querySelectorAll('#'+cid+' .opt').forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel');
+      S.single[key]=el.dataset[Object.keys(el.dataset)[0]];
+      if(key==='split'){S.single.muscles=[];document.querySelectorAll('#s-muscleOpts .opt').forEach(s=>s.classList.remove('sel'));}
+    });
+  });
+}
+wireSingle('s-splitOpts','split');wireSingle('s-muscleOpts',null);
+wireSingle('s-durOpts','dur');wireSingle('s-goalOpts','goal');
+document.getElementById('s-outpos').addEventListener('change',e=>S.single.outpos=e.target.checked);
+
+// ===== EQUIPMENT SELECTION =====
+const EQUIP_LIST=[
+  {code:'bb',label:'Langhantel'},
+  {code:'dbH',label:'Kurzhanteln schwer (bis ~20 kg)'},
+  {code:'dbL',label:'Kurzhanteln leicht (bis 7,5 kg)'},
+  {code:'bench',label:'Bank'},
+  {code:'pullup',label:'Klimmzugstange 🌤️'},
+  {code:'rope',label:'Battle Rope 🌤️'},
+  {code:'abtr',label:'Bauch-/Rückentrainer'},
+  {code:'band',label:'Widerstandsbänder'},
+  {code:'bodyweight',label:'Körpergewicht (immer)'}
+];
+const PRESETS={
+  full:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],
+  travel:['dbL','band']
+};
+function renderEquipGrid(target){
+  const gridId=target==='single'?'s-equipGrid':'p-equipGrid';
+  const grid=document.getElementById(gridId);
+  if(!grid)return;
+  const cur=new Set(target==='single'?S.single.equip:S.program.equip);
+  grid.innerHTML=EQUIP_LIST.map(function(e){
+    if(e.code==='bodyweight')return '<div class="eq-item on" style="opacity:.7;pointer-events:none;"><div class="eq-check">✓</div>'+e.label+'</div>';
+    const on=cur.has(e.code)?' on':'';
+    return '<div class="eq-item'+on+'" data-eqtoggle="'+e.code+'" data-eqtarget="'+target+'"><div class="eq-check">'+(on?'✓':'')+'</div>'+e.label+'</div>';
+  }).join('');
+}
+function toggleEquip(target,code){
+  const arr=target==='single'?S.single.equip:S.program.equip;
+  const i=arr.indexOf(code);
+  if(i===-1)arr.push(code);else arr.splice(i,1);
+  renderEquipGrid(target);autoSave();
+}
+function applyPreset(target,preset){
+  const eq=PRESETS[preset].slice();
+  if(target==='single')S.single.equip=eq;else S.program.equip=eq;
+  renderEquipGrid(target);autoSave();
+}
+renderEquipGrid('single');
+renderEquipGrid('program');
+document.getElementById('s-pulse').addEventListener('change',e=>S.single.pulse=e.target.checked);
+document.getElementById('s-advanced').addEventListener('change',e=>S.single.advanced=e.target.checked);
+
+// program opts
+document.querySelectorAll('#p-goalOpts .opt').forEach(el=>el.addEventListener('click',()=>{
+  document.querySelectorAll('#p-goalOpts .opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.program.goal=el.dataset.goal;
+}));
+document.querySelectorAll('#p-durOpts .opt').forEach(el=>el.addEventListener('click',()=>{
+  document.querySelectorAll('#p-durOpts .opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.program.dur=el.dataset.dur;
+}));
+document.getElementById('p-weeks').addEventListener('change',e=>S.program.weeks=parseInt(e.target.value)||6);
+document.getElementById('p-deload').addEventListener('change',e=>S.program.deload=e.target.checked);
+document.getElementById('p-advanced').addEventListener('change',e=>S.program.advanced=e.target.checked);
+
+// custom muscle select
+let customMuscles=[];
+document.querySelectorAll('#c-muscles .opt').forEach(el=>el.addEventListener('click',()=>{
+  el.classList.toggle('sel');const m=el.dataset.m;
+  if(el.classList.contains('sel'))customMuscles.push(m);else customMuscles=customMuscles.filter(x=>x!==m);
+}));
+
+// =============== EQUIPMENT LOGIC ===============
+// Equipment set from cfg.equip (array of codes). Codes:
+// bb, dbH (heavy db), dbL (light db), bench, band, pullup, rope, abtr, bodyweight
+function makeEq(equipArr){
+  const set=new Set(equipArr||[]);
+  return {
+    has:function(code){return set.has(code);},
+    // dbEITHER satisfied if any dumbbell present (heavy or light)
+    hasDbEither:set.has('dbH')||set.has('dbL'),
+    outdoor:set.has('pullup')||set.has('rope')
+  };
+}
+function exAllowed(ex,eq){
+  if(ex.custom)return true;
+  // outdoor exercises need their specific gear (pullup/rope) which is in the set
+  if(ex.equip.length===0)return true; // bodyweight-only always allowed
+  return ex.equip.every(function(code){
+    if(code==='dbEITHER')return eq.hasDbEither;
+    return eq.has(code);
+  });
+}
+
+// =============== PLAN BUILDER ===============
+function buildPlan(cfg){
+  // cfg: {equip:[...],split,muscles,dur,goal,outpos}
+  const eq=makeEq(cfg.equip);
+  const count=DUR_COUNT[cfg.dur];
+  const goal=GOALS[cfg.goal];
+  let targets=[],focusLabel='';
+  if(cfg.muscles&&cfg.muscles.length>0){
+    targets=[...cfg.muscles];
+    const nm={chest:'Brust',back:'Rücken',shoulders:'Schultern',arms:'Arme',legs:'Beine',core:'Core'};
+    focusLabel=cfg.muscles.map(m=>nm[m]).join(' + ');
+  }else{
+    const sm={push:['chest','shoulders','arms'],pull:['back','arms'],legs:['legs','core'],full:['chest','back','shoulders','legs','core','arms']};
+    targets=sm[cfg.split];
+    const lb={push:'Push · Brust, Schultern, Trizeps',pull:'Pull · Rücken, Bizeps',legs:'Beine & Core',full:'Ganzkörper'};
+    focusLabel=lb[cfg.split];
+  }
+  const db=activeDB();
+  const advOK=e=>(!e.adv||cfg.advanced);
+  let cands;
+  if(cfg.muscles&&cfg.muscles.length>0){
+    cands=db.filter(ex=>exAllowed(ex,eq)&&advOK(ex)&&ex.m.some(m=>targets.includes(m)));
+  }else{
+    cands=db.filter(ex=>exAllowed(ex,eq)&&advOK(ex)&&ex.m.some(m=>targets.includes(m))&&(ex.custom||ex.g.includes(cfg.split)));
+  }
+  const picked=[],used=new Set();
+  const coreEx=cands.filter(e=>e.m.includes('core')&&!e.outdoor);
+  const nonCore=cands.filter(e=>!(e.m.length===1&&e.m[0]==='core'));
+  targets.forEach(m=>{
+    if(m==='core')return;
+    const pool=nonCore.filter(e=>e.m.includes(m)&&!used.has(e.n));
+    if(pool.length){const p=pool[Math.floor(Math.random()*pool.length)];picked.push(p);used.add(p.n);}
+  });
+  const wantCore=targets.includes('core');
+  const mainCount=wantCore?count-1:count;
+  let pool2=nonCore.filter(e=>!used.has(e.n));
+  while(picked.length<mainCount&&pool2.length){
+    const p=pool2[Math.floor(Math.random()*pool2.length)];picked.push(p);used.add(p.n);
+    pool2=pool2.filter(e=>!used.has(e.n));
+  }
+  let finisher=null;
+  if(wantCore&&coreEx.length){finisher=coreEx[Math.floor(Math.random()*coreEx.length)];}
+  // split outdoor vs indoor
+  const outdoor=picked.filter(e=>e.outdoor);
+  const indoor=picked.filter(e=>!e.outdoor);
+  return {focusLabel,goal,indoor,outdoor,finisher,cfg};
+}
+
+function warmupFor(targets){
+  // targeted warm-up text
+  let parts=[];
+  if(targets.includes('shoulders')||targets.includes('chest'))parts.push('Schulterkreisen und Armkreisen');
+  if(targets.includes('back'))parts.push('Rumpfrotationen und Katze-Kuh');
+  if(targets.includes('legs'))parts.push('Hüftkreisen, Kniebeugen ohne Gewicht, Ausfallschritte');
+  if(targets.includes('core'))parts.push('leichte Rumpfaktivierung');
+  if(parts.length===0)parts.push('lockere Ganzkörper-Mobilisation');
+  return '90 Sek. lockeres Springen/Hampelmänner + 90 Sek. '+parts.join(', ')+' + 1 leichter Satz der ersten Übung.';
+}
+
+function renderExRow(ex,idx,ctx,star){
+  const g=ctx.goal;
+  let dose;
+  if(ex.custom&&(ex.cSets||ex.cReps)){dose=(ex.cSets||g.sets)+' × '+(ex.cReps||g.reps);}
+  else if(ex.m.includes('core')&&ex.m.length===1){dose='3 × '+(ex.n.includes('Hold')||ex.n.includes('Plank')||ex.n.includes('Wall')?'30–45 Sek.':g.reps);}
+  else{dose=g.sets+' × '+g.reps;}
+  const numCell=star?'<div class="ex-n" style="background:var(--sun);color:var(--ink)">★</div>':`<div class="ex-n">${idx}</div>`;
+  const listKey=ex.outdoor?'outdoor':'indoor';
+  const enc=encodeURIComponent(ex.n);
+  return `<div class="ex" data-exname="${enc}" data-list="${listKey}">
+    ${numCell}
+    <div class="ex-info"><div class="en">${ex.n}</div><div class="em">${ex.cue}</div>
+      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="ex-swap" data-act="swap" data-ex="${enc}" data-list="${listKey}">⟳ tauschen</button>
+      <button type="button" class="ex-swap" data-act="hide" data-ex="${enc}" style="border-color:#f0d5d0;color:var(--coral);">✕ sperren</button>
+      </div>
+    </div>
+    <div class="ex-dose"><b>${dose}</b>Pause ${g.rest}</div>
+  </div>`;
+}
+
+let LAST_SINGLE=null;
+function genSingle(){
+  const plan=buildPlan({...S.single});
+  LAST_SINGLE=plan;
+  document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
+  document.getElementById('s-output').scrollIntoView({behavior:'smooth'});
+}
+
+function renderPlanHtml(plan,ctxId){
+  const {focusLabel,goal,indoor,outdoor,finisher,cfg}=plan;
+  if(indoor.length===0&&outdoor.length===0)return '<div class="result"><div class="block empty">Zu wenige Übungen für diese Kombination. Andere Auswahl oder Draußen-Equipment aktivieren.</div></div>';
+  let targets=cfg.muscles&&cfg.muscles.length?cfg.muscles:({push:['chest','shoulders','arms'],pull:['back','arms'],legs:['legs','core'],full:['chest','back','shoulders','legs','core','arms']}[cfg.split]);
+  const pulse=cfg.pulse?`<div class="pulse"><strong>♥ Kreislauf-Regeln</strong>RPE 7–8 statt Maximallast · bei jeder Wiederholung ausatmen · nach Boden-Übungen 3 Sek. sitzen bleiben. Bei Schwindel Pause und ggf. ärztlich abklären.</div>`:'';
+  const ctx={goal,ctxId};
+  let warmHtml=`<div class="block"><span class="block-label warm">Warm-up · 3–5 Min.</span><div class="block-hint">${warmupFor(targets)}</div></div>`;
+  let outHtml='';
+  if(outdoor.length){
+    let rows=outdoor.map((e,i)=>renderExRow(e,i+1,ctx)).join('');
+    outHtml=`<div class="block"><span class="block-label out">🌤️ Draußen-Block</span><div class="block-hint">Klimmzüge / Battle Rope am Stück draußen – danach zurück nach drinnen. Nur bei trockenem Wetter.</div>${rows}</div>`;
+  }
+  let inRows=indoor.map((e,i)=>renderExRow(e,i+1,ctx)).join('');
+  let inHtml=`<div class="block"><span class="block-label">${outdoor.length?'Drinnen-Block':'Hauptblock'}</span><div class="block-hint">${goal.note}</div>${inRows}</div>`;
+  let finHtml='';
+  if(finisher)finHtml=`<div class="block"><span class="block-label fin">Core-Finisher</span><div class="block-hint">3 Runden zum Abschluss. Bei Zeitmangel weglassen.</div>${renderExRow(finisher,1,ctx,true)}</div>`;
+  const eqSet=new Set(cfg.equip||[]);
+  const isTravel=!eqSet.has('bb')&&!eqSet.has('dbH')&&!eqSet.has('abtr');
+  const locTag=isTravel?'🏖️ Reisegepäck':'🏠 Training';
+  // order: warm, then outdoor-first OR outdoor-last
+  let body=warmHtml;
+  if(outdoor.length&&!cfg.outpos){body+=outHtml+inHtml;}
+  else if(outdoor.length&&cfg.outpos){body+=inHtml+outHtml;}
+  else{body+=inHtml;}
+  body+=finHtml;
+  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ${cfg.dur} Min · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Core-Finisher':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
+  <div class="actions"><button class="act primary" data-act="print">Als PDF / Drucken</button><button class="act" data-act="regen">Neue Variante ⟳</button></div>`;
+}
+
+// swap single exercise - robust: find by name, replace in place
+function doSwap(btn){
+  const curName=decodeURIComponent(btn.getAttribute('data-ex'));
+  const listKey=btn.getAttribute('data-list');
+  const plan=LAST_SINGLE;
+  if(!plan){alert('Bitte zuerst einen Plan erstellen.');return;}
+  const arr=listKey==='outdoor'?plan.outdoor:plan.indoor;
+  const idx=arr.findIndex(e=>e.n===curName);
+  if(idx===-1){return;}
+  const isOutdoor=listKey==='outdoor';
+  const eq=makeEq(plan.cfg.equip);
+  const usedNames=plan.indoor.concat(plan.outdoor).map(e=>e.n);
+  const db=activeDB();
+  const cur=db.find(e=>e.n===curName)||arr[idx];
+  const pool=db.filter(e=>exAllowed(e,eq)&&usedNames.indexOf(e.n)===-1&&(!!e.outdoor===!!isOutdoor)&&e.m.some(m=>cur.m.indexOf(m)!==-1)&&(!e.adv||plan.cfg.advanced));
+  if(!pool.length){alert('Keine passende Alternative verfügbar für diese Muskelgruppe.');return;}
+  const repl=pool[Math.floor(Math.random()*pool.length)];
+  arr[idx]=repl;
+  document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
+}
+
+function hideEx(encName){
+  const n=decodeURIComponent(encName);
+  if(!S.hiddenEx.includes(n))S.hiddenEx.push(n);
+  if(LAST_SINGLE)genSingle();
+  autoSave();
+}
+
+function printPlan(){
+  const out=document.getElementById('s-output');
+  const planHtml=out?out.innerHTML:'';
+  if(!planHtml||planHtml.indexOf('result-head')===-1){alert('Bitte zuerst einen Plan erstellen.');return;}
+  const pa=document.getElementById('printArea');
+  // strip the action buttons from the print copy
+  pa.innerHTML='<div style="padding:16px;">'+planHtml+'</div>';
+  pa.style.display='block';
+  window.print();
+  setTimeout(function(){pa.style.display='none';pa.innerHTML='';},600);
+}
+
+// =============== PROGRAM ===============
+function initDayConfig(){
+  const c=document.getElementById('p-dayconfig');
+  c.innerHTML='';
+  DAYS.forEach(d=>{
+    if(!S.program.days[d])S.program.days[d]={type:'rest'};
+    const cell=document.createElement('div');
+    cell.className='dc-cell';
+    cell.innerHTML=`<span class="dn">${d}</span><span class="dv"></span>`;
+    cell.addEventListener('click',()=>cycleDayType(d,cell));
+    c.appendChild(cell);
+    updateDayCell(d,cell);
+  });
+}
+const DAY_CYCLE=['rest','push','pull','legs','full','padel','bike1','bike2','walk20','walk45'];
+function cycleDayType(d,cell){
+  let cur=S.program.days[d].type||'rest';
+  let idx=DAY_CYCLE.indexOf(cur);
+  idx=(idx+1)%DAY_CYCLE.length;
+  S.program.days[d]={type:DAY_CYCLE[idx]};
+  updateDayCell(d,cell);
+}
+function updateDayCell(d,cell){
+  const t=S.program.days[d].type;
+  const dv=cell.querySelector('.dv');
+  const splitNames={push:'Push',pull:'Pull',legs:'Beine',full:'Ganzk.'};
+  const actShort={padel:'🎾 Padel',bike1:'🚴 1h',bike2:'🚴 2h',walk20:'🚶 20m',walk45:'🚶 45m'};
+  cell.classList.remove('set','act-set');
+  if(['push','pull','legs','full'].includes(t)){dv.textContent=splitNames[t];cell.classList.add('set');}
+  else if(t==='rest'){dv.textContent='–';}
+  else{dv.innerHTML=actShort[t];cell.classList.add('act-set');}
+}
+
+let LAST_PROGRAM=null;
+function genProgram(){
+  const weeks=S.program.weeks;
+  const out=document.getElementById('p-output');
+  const anyTraining=Object.values(S.program.days).some(x=>['push','pull','legs','full'].includes(x.type));
+  const anyDay=Object.values(S.program.days).some(x=>x.type!=='rest');
+  if(!anyDay){out.innerHTML='<div class="info coral"><h4>Keine Tage belegt</h4>Tippe oben mindestens einen Wochentag an, um ihn als Training oder Aktivität zu setzen.</div>';return;}
+  let html='';
+  const programData=[];
+  for(let w=1;w<=weeks;w++){
+    const isDeload=S.program.deload&&w%4===0;
+    let weekDays=[];
+    DAYS.forEach(d=>{
+      const cfg=S.program.days[d];
+      if(cfg.type==='rest'){weekDays.push({day:d,type:'rest'});return;}
+      if(['padel','bike1','bike2','walk20','walk45'].includes(cfg.type)){
+        weekDays.push({day:d,type:'activity',act:cfg.type});return;
+      }
+      // training day
+      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced});
+      weekDays.push({day:d,type:'training',split:cfg.type,plan,deload:isDeload});
+    });
+    programData.push({week:w,deload:isDeload,days:weekDays});
+  }
+  LAST_PROGRAM=programData;
+  // render calendar
+  programData.forEach(wd=>{
+    html+=`<div class="cal-week"><div class="cal-week-head"><span>Woche ${wd.week}</span>${wd.deload?'<span class="dl">Deload · leichter</span>':''}</div>`;
+    wd.days.forEach(dd=>{
+      if(dd.type==='rest'){
+        html+=`<div class="cal-day rest"><div class="cd-day">${dd.day}</div><div class="cd-main"><div class="cd-title">Ruhetag</div><div class="cd-sub">Erholung</div></div><div class="cd-icon">😴</div></div>`;
+      }else if(dd.type==='activity'){
+        const a=ACTIVITIES[dd.act];
+        html+=`<div class="cal-day activity"><div class="cd-day">${dd.day}</div><div class="cd-main"><div class="cd-title">${a.t}</div><div class="cd-sub">${a.sub}</div></div><div class="cd-icon">${a.icon}</div></div>`;
+      }else{
+        const splitNames={push:'Push',pull:'Pull',legs:'Beine & Core',full:'Ganzkörper'};
+        html+=`<div class="cal-day train" data-act="openday" data-week="${wd.week}" data-day="${dd.day}"><div class="cd-day">${dd.day}</div><div class="cd-main"><div class="cd-title">${splitNames[dd.split]}${dd.deload?' (leicht)':''}</div><div class="cd-sub">Tippen für Übungen →</div></div><div class="cd-icon">🏋️</div></div>`;
+      }
+    });
+    html+=`<div style="padding:10px 16px;"><button class="act" style="width:100%;" data-act="printweek" data-week="${wd.week}">Woche ${wd.week} als PDF / drucken</button></div>`;
+    html+='</div>';
+  });
+  out.innerHTML=html;
+  out.scrollIntoView({behavior:'smooth'});
+  autoSave();
+}
+
+function showProgramDay(week,day){
+  const wd=LAST_PROGRAM.find(x=>x.week===week);
+  const dd=wd.days.find(x=>x.day===day);
+  if(!dd||dd.type!=='training')return;
+  // render plan in an overlay-like block replacing output temporarily
+  const html=renderPlanHtml(dd.plan,'prog');
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;padding:20px 12px;';
+  modal.innerHTML=`<div style="max-width:900px;margin:0 auto;"><button class="act primary" id="modalClose" style="width:100%;margin-bottom:10px;">✕ Schließen</button><div style="background:#fff;border-radius:14px;overflow:hidden;padding:12px;font-weight:800;color:#0E3A5C;">${DAYFULL[day]} · Woche ${week}</div>${html}</div>`;
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  var cb=modal.querySelector('#modalClose');
+  if(cb)cb.addEventListener('click',function(){modal.remove();});
+  // fix: inside modal, swap/regen data-act still work via global delegation, but regen would target s-output.
+  // disable regen inside modal by removing that button
+  var rg=modal.querySelector('[data-act="regen"]');if(rg)rg.style.display='none';
+  var pr=modal.querySelector('[data-act="print"]');if(pr)pr.addEventListener('click',function(){window.print();});
+}
+
+function printWeek(week){
+  const wd=LAST_PROGRAM.find(x=>x.week===week);
+  let html=`<div style="padding:20px;"><h2 style="color:#0E3A5C;text-transform:uppercase;">Woche ${week}${wd.deload?' · Deload':''}</h2>`;
+  wd.days.forEach(dd=>{
+    html+=`<div style="margin:14px 0;padding:12px;border:1.5px solid #DDD8CE;border-radius:10px;page-break-inside:avoid;"><h3 style="color:#0E3A5C;font-size:15px;">${DAYFULL[dd.day]}</h3>`;
+    if(dd.type==='rest')html+='<p>Ruhetag – Erholung</p>';
+    else if(dd.type==='activity')html+=`<p>${ACTIVITIES[dd.act].icon} ${ACTIVITIES[dd.act].t} – ${ACTIVITIES[dd.act].sub}</p>`;
+    else{
+      const all=[...dd.plan.outdoor,...dd.plan.indoor];
+      if(dd.plan.finisher)all.push(dd.plan.finisher);
+      html+='<ol style="margin-left:18px;font-size:13px;">'+all.map(e=>`<li style="margin:4px 0;"><b>${e.n}</b> – ${dd.plan.goal.sets}×${dd.plan.goal.reps}, Pause ${dd.plan.goal.rest}<br><span style="color:#888;font-size:11px;">${e.cue}</span></li>`).join('')+'</ol>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  const pa=document.getElementById('printArea');
+  pa.innerHTML=html;pa.style.display='block';
+  const views=document.querySelectorAll('.view');views.forEach(v=>v.dataset._d=v.style.display);
+  window.print();
+  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},500);
+}
+
+// =============== BODY METRICS ===============
+function addMetric(){
+  const w=parseFloat(document.getElementById('b-weight').value);
+  const k=parseFloat(document.getElementById('b-kfa').value);
+  if(!w&&!k){return;}
+  S.metrics.push({d:Date.now(),w:w||null,k:k||null});
+  document.getElementById('b-weight').value='';document.getElementById('b-kfa').value='';
+  renderMetrics();autoSave();
+}
+function delMetric(i){S.metrics.splice(i,1);renderMetrics();autoSave();}
+function weeklyAvg(arr,key){
+  // group by ~7 day buckets from most recent
+  if(arr.length===0)return[];
+  const sorted=[...arr].filter(m=>m[key]!=null).sort((a,b)=>a.d-b.d);
+  if(sorted.length===0)return[];
+  const weeks=[];const msWeek=7*24*3600*1000;
+  let start=sorted[0].d;
+  let bucket=[],bstart=start;
+  sorted.forEach(m=>{
+    if(m.d-bstart<msWeek){bucket.push(m[key]);}
+    else{if(bucket.length)weeks.push(bucket.reduce((a,b)=>a+b,0)/bucket.length);bucket=[m[key]];bstart=m.d;}
+  });
+  if(bucket.length)weeks.push(bucket.reduce((a,b)=>a+b,0)/bucket.length);
+  return weeks;
+}
+function renderMetrics(){
+  const log=document.getElementById('b-log');
+  if(S.metrics.length===0){log.innerHTML='<div class="empty">Noch keine Einträge.</div>';document.getElementById('b-trend').innerHTML='';return;}
+  const wAvg=weeklyAvg(S.metrics,'w');
+  const kAvg=weeklyAvg(S.metrics,'k');
+  let trendHtml='';
+  if(wAvg.length>=1){
+    const cur=wAvg[wAvg.length-1];
+    let arrow='',cls='flat',txt='erster Wert';
+    if(wAvg.length>=2){
+      const prev=wAvg[wAvg.length-2];const diff=cur-prev;
+      if(diff<-0.15){cls='down';arrow='▼';txt=diff.toFixed(1)+' kg/Woche';}
+      else if(diff>0.15){cls='up';arrow='▲';txt='+'+diff.toFixed(1)+' kg/Woche';}
+      else{cls='flat';arrow='▬';txt='stabil';}
+    }
+    trendHtml+=`<div class="trend-box"><div class="mini">Gewicht · Wochendurchschnitt</div><div class="trend-val">${cur.toFixed(1)} kg <span class="trend-arrow ${cls}">${arrow} ${txt}</span></div>${sparkline(wAvg)}</div>`;
+  }
+  if(kAvg.length>=1){
+    const cur=kAvg[kAvg.length-1];
+    let cls='flat',arrow='▬',txt='stabil';
+    if(kAvg.length>=2){const diff=cur-kAvg[kAvg.length-2];if(diff<-0.2){cls='down';arrow='▼';txt=diff.toFixed(1)+' %';}else if(diff>0.2){cls='up';arrow='▲';txt='+'+diff.toFixed(1)+' %';}}
+    trendHtml+=`<div class="trend-box"><div class="mini">Körperfett · Wochendurchschnitt (grober Trend)</div><div class="trend-val">${cur.toFixed(1)} % <span class="trend-arrow ${cls}">${arrow} ${txt}</span></div>${sparkline(kAvg)}</div>`;
+  }
+  // honest interpretation
+  trendHtml+=interpretTrend(wAvg,kAvg);
+  document.getElementById('b-trend').innerHTML=trendHtml;
+  // log list
+  const items=[...S.metrics].sort((a,b)=>b.d-a.d).map((m,i)=>{
+    const realIdx=S.metrics.indexOf(m);
+    const dt=new Date(m.d);const ds=dt.getDate()+'.'+(dt.getMonth()+1)+'.';
+    let vals=[];if(m.w)vals.push(m.w.toFixed(1)+' kg');if(m.k)vals.push(m.k.toFixed(1)+' %');
+    return `<div class="log-item"><span>${ds}</span><span>${vals.join(' · ')} <span class="li-del" data-act="delmetric" data-i="${realIdx}">✕</span></span></div>`;
+  }).join('');
+  log.innerHTML=items;
+}
+function sparkline(data){
+  if(data.length<2)return'';
+  const w=300,h=60,pad=6;
+  const min=Math.min(...data),max=Math.max(...data),range=max-min||1;
+  const pts=data.map((v,i)=>{const x=pad+i*(w-2*pad)/(data.length-1);const y=h-pad-((v-min)/range)*(h-2*pad);return x+','+y;}).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;"><polyline points="${pts}" fill="none" stroke="#1B6E9C" stroke-width="2.5"/></svg>`;
+}
+function interpretTrend(wAvg,kAvg){
+  if(wAvg.length<2&&kAvg.length<2)return '<div class="info"><h4>Noch zu wenig Daten</h4>Ab dem zweiten Wochendurchschnitt siehst du hier eine Einordnung. Trage weiter täglich morgens dein Gewicht ein.</div>';
+  const wDiff=wAvg.length>=2?wAvg[wAvg.length-1]-wAvg[wAvg.length-2]:null;
+  const kDiff=kAvg.length>=2?kAvg[kAvg.length-1]-kAvg[kAvg.length-2]:null;
+  if((wDiff!=null&&wDiff>0.15)||(kDiff!=null&&kDiff>0.2)){
+    return '<div class="info coral"><h4>Trend geht die falsche Richtung</h4>Der Wochenschnitt steigt statt zu sinken. Der Hebel liegt fast sicher bei der <strong>Ernährung, nicht beim Training</strong> – mehr oder härteres Training ist nicht die Lösung. Prüfe deine Kalorienzufuhr (Portionsgrößen, Snacks, Wochenende), bevor du am Trainingsplan etwas änderst. Denk daran: einzelne Werte schwanken, erst ein anhaltender Trend über 2–3 Wochen zählt.</div>';
+  }
+  if(wDiff!=null&&wDiff<-0.15){
+    return '<div class="info green"><h4>Alles richtig</h4>Der Wochenschnitt sinkt im idealen Bereich (~0,3–0,5 kg/Woche wäre optimal). Solange deine notierten Trainingsgewichte stabil bleiben, verlierst du Fett und hältst die Muskeln. Genau so weitermachen.</div>';
+  }
+  return '<div class="info"><h4>Stabil</h4>Der Wochenschnitt bleibt konstant. Wenn du abnehmen willst, fehlt ein kleines Defizit – 150–250 kcal weniger pro Tag oder eine bewusstere Portionskontrolle. Bleibt es dein Ziel, Gewicht zu halten, ist alles gut.</div>';
+}
+
+// =============== CUSTOM EXERCISES ===============
+function addCustom(){
+  const name=document.getElementById('c-name').value.trim();
+  const cue=document.getElementById('c-cue').value.trim()||'Eigene Übung.';
+  const sets=document.getElementById('c-sets').value.trim();
+  const reps=document.getElementById('c-reps').value.trim();
+  const adv=document.getElementById('c-adv').checked;
+  if(!name||customMuscles.length===0){alert('Bitte Name und mindestens eine Muskelgruppe angeben.');return;}
+  S.customEx.push({n:name,m:customMuscles.slice(),g:['push','pull','legs','full'],equip:[],cue,custom:true,adv:adv,
+    cSets:sets||null,cReps:reps||null});
+  document.getElementById('c-name').value='';document.getElementById('c-cue').value='';
+  document.getElementById('c-sets').value='3';document.getElementById('c-reps').value='';document.getElementById('c-adv').checked=false;
+  customMuscles=[];document.querySelectorAll('#c-muscles .opt').forEach(s=>s.classList.remove('sel'));
+  renderCustom();autoSave();
+  alert('Übung „'+name+'" hinzugefügt. Sie erscheint jetzt im Generator.');
+}
+function delCustom(i){S.customEx.splice(i,1);renderCustom();autoSave();}
+function renderCustom(){
+  const c=document.getElementById('c-list');
+  if(S.customEx.length===0){c.innerHTML='<div class="empty" style="padding:14px;">Noch keine eigenen Übungen.</div>';return;}
+  const nm={chest:'Brust',back:'Rücken',shoulders:'Schultern',arms:'Arme',legs:'Beine',core:'Core'};
+  c.innerHTML=S.customEx.map((e,i)=>{
+    let d=[];if(e.cSets||e.cReps)d.push((e.cSets||'?')+'×'+(e.cReps||'?'));if(e.adv)d.push('fortgeschritten');
+    const extra=d.length?' · '+d.join(' · '):'';
+    return `<div class="custom-item"><span><b>${e.n}</b> · ${e.m.map(m=>nm[m]).join(', ')}${extra}</span><span class="ci-del" data-act="delcustom" data-i="${i}">✕</span></div>`;
+  }).join('');
+}
+function renderHidden(){
+  const c=document.getElementById('c-hidden');
+  if(S.hiddenEx.length===0){c.innerHTML='<div class="empty">Keine gesperrten Übungen.</div>';return;}
+  c.innerHTML=S.hiddenEx.map(n=>`<span class="hidden-ex-tag" data-act="unhide" data-ex="${encodeURIComponent(n)}">${n} ✕</span>`).join('');
+}
+function unhide(enc){const n=decodeURIComponent(enc);S.hiddenEx=S.hiddenEx.filter(x=>x!==n);renderHidden();autoSave();}
+
+// =============== SAVE / EXPORT ===============
+function saveLocal(){
+  try{localStorage.setItem('trainingStudio',JSON.stringify(S));setStatus('Im Browser gespeichert ✓');}
+  catch(e){setStatus('Speichern fehlgeschlagen (evtl. privater Modus). Nutze Export.',true);}
+}
+function autoSave(){try{localStorage.setItem('trainingStudio',JSON.stringify(S));}catch(e){}}
+function loadLocal(){
+  try{const d=localStorage.getItem('trainingStudio');if(d){S=Object.assign(S,JSON.parse(d));}}catch(e){}
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  const dt=new Date();a.download='TrainingsStudio_'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  setStatus('Exportiert – in Dateien/iCloud sichern ✓');
+}
+function importData(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{try{S=Object.assign(S,JSON.parse(e.target.result));autoSave();initDayConfig();renderCustom();renderHidden();renderMetrics();setStatus('Importiert ✓');}catch(err){setStatus('Import fehlgeschlagen – falsche Datei?',true);}};
+  r.readAsText(f);
+}
+function setStatus(msg,err){const s=document.getElementById('d-status');s.textContent=msg;s.style.color=err?'#D95D4E':'#2E8B6E';}
+
+// =============== INIT ===============
+loadLocal();
+initDayConfig();
+renderEquipGrid('single');
+renderEquipGrid('program');
+// restore program selections
+if(S.program.goal){document.querySelectorAll('#p-goalOpts .opt').forEach(o=>o.classList.toggle('sel',o.dataset.goal===S.program.goal));}
+if(S.program.dur){document.querySelectorAll('#p-durOpts .opt').forEach(o=>o.classList.toggle('sel',o.dataset.dur===S.program.dur));}
+document.getElementById('p-weeks').value=S.program.weeks;
+document.getElementById('p-deload').checked=S.program.deload;
+</script>
+</body>
+</html>
