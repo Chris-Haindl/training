@@ -115,6 +115,15 @@ label.fld{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.
 .block:last-child{border-bottom:none;}
 .block-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:#fff;background:var(--blue);display:inline-block;padding:4px 12px;border-radius:6px;margin-bottom:4px;}
 .block-label.warm{background:var(--green);}
+.block-label.ss{background:var(--blue);color:#fff;}
+.ss-block{border:1.5px solid var(--blue);border-radius:11px;padding:10px 12px;margin:10px 0;background:var(--blue-l);}
+.ss-head{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--deep);margin-bottom:4px;}
+.ss-block .ex{border-bottom:1px dashed rgba(0,43,73,.18);}
+.ss-block .ex:last-of-type{border-bottom:none;}
+.ss-rest{font-size:11px;color:var(--deep);font-weight:700;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,43,73,.15);}
+.ss-single{margin:6px 0;}
+.ss-warn{background:var(--red-l);border:1.5px solid var(--red);border-radius:9px;padding:10px 12px;font-size:11.5px;margin:8px 0;color:#7A1F26;}
+.ss-warn strong{display:block;text-transform:uppercase;font-size:9.5px;letter-spacing:1px;color:var(--red);margin-bottom:3px;}
 .block-label.fin{background:var(--red);color:#fff;}
 .block-label.out{background:var(--deep);}
 .block-hint{font-size:11.5px;color:#6B7680;font-style:italic;margin:5px 0 10px;}
@@ -295,6 +304,14 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <label class="switch"><input type="checkbox" id="s-preffav"><span class="slider"></span></label>
       <span>Favoriten (★) bevorzugen</span>
     </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="s-superset"><span class="slider"></span></label>
+      <span>Supersätze (Antagonisten) · zwei Übungen ohne Pause</span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="s-failure"><span class="slider"></span></label>
+      <span>Letzter Satz bis Muskelversagen <span style="color:var(--red);">⚠️</span></span>
+    </div>
   </div>
 
   <button type="button" class="genbtn" data-act="gensingle">Plan erstellen ⚡</button>
@@ -321,6 +338,14 @@ canvas{width:100%;height:auto;margin-top:10px;}
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="p-preffav"><span class="slider"></span></label>
       <span>Favoriten (★) bevorzugen</span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-superset"><span class="slider"></span></label>
+      <span>Supersätze (Antagonisten) · zwei Übungen ohne Pause</span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-failure"><span class="slider"></span></label>
+      <span>Letzter Satz bis Muskelversagen <span style="color:var(--red);">⚠️</span></span>
     </div>
     <div class="mini" style="margin-top:14px;">Equipment fürs ganze Programm:</div>
     <div class="opt-grid" style="margin-bottom:10px;">
@@ -536,8 +561,8 @@ const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", 
 
 // =============== STATE ===============
 let S = {
-  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'30',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false},
-  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'30',days:{},advanced:false,prefFav:false},
+  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'30',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false,superset:false,failure:false},
+  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'30',days:{},advanced:false,prefFav:false,superset:false,failure:false},
   customEx:[],
   hiddenEx:[],
   favEx:[],
@@ -553,7 +578,8 @@ const GOALS = {
   build:{sets:"4",reps:"8–12",rest:"60–90 Sek.",label:"Aufbau",note:"Progressive Belastung: Gewicht steigern, wenn das obere Wiederholungsziel sauber erreicht wird."},
   strength:{sets:"5",reps:"4–6",rest:"2–3 Min.",label:"Kraft",note:"Schwere Gewichte, längere Pausen. Perfekte Technik, im Defizit nicht bis zum Muskelversagen."}
 };
-const DUR_COUNT = {"20":4,"30":5,"45":6,"60":8};
+const DUR_COUNT = {"20":4,"30":6,"45":8,"60":10};
+const SS_REST = "45–60 Sek.";
 const ACTIVITIES = {
   padel:{t:"Padel",sub:"ca. 1,5 h · zählt als Cardio + Beine",icon:"🎾"},
   bike1:{t:"Radfahren 1 h",sub:"Zone 2 Grundlage",icon:"🚴"},
@@ -663,6 +689,8 @@ if(advonly)advonly.addEventListener('change',function(e){alleFilter.advonly=e.ta
 document.getElementById('s-pulse').addEventListener('change',e=>S.single.pulse=e.target.checked);
 document.getElementById('s-advanced').addEventListener('change',e=>S.single.advanced=e.target.checked);
 document.getElementById('s-preffav').addEventListener('change',e=>S.single.prefFav=e.target.checked);
+document.getElementById('s-superset').addEventListener('change',e=>S.single.superset=e.target.checked);
+document.getElementById('s-failure').addEventListener('change',e=>S.single.failure=e.target.checked);
 
 // program opts
 document.querySelectorAll('#p-goalOpts .opt').forEach(el=>el.addEventListener('click',()=>{
@@ -675,6 +703,8 @@ document.getElementById('p-weeks').addEventListener('change',e=>S.program.weeks=
 document.getElementById('p-deload').addEventListener('change',e=>S.program.deload=e.target.checked);
 document.getElementById('p-advanced').addEventListener('change',e=>S.program.advanced=e.target.checked);
 document.getElementById('p-preffav').addEventListener('change',e=>S.program.prefFav=e.target.checked);
+document.getElementById('p-superset').addEventListener('change',e=>S.program.superset=e.target.checked);
+document.getElementById('p-failure').addEventListener('change',e=>S.program.failure=e.target.checked);
 
 // custom muscle select
 let customMuscles=[];
@@ -699,6 +729,88 @@ function exAllowed(ex,eq){
     if(code==='dbEITHER')return eq.hasDbEither;
     return eq.has(code);
   });
+}
+
+// =============== SUPERSATZ-LOGIK ===============
+// Primärer Muskel einer Übung (erster Eintrag) für Antagonisten-Zuordnung
+function primaryMuscle(ex){ return ex.m && ex.m.length ? ex.m[0] : null; }
+// Antagonisten-Paare (Gegenspieler). Symmetrisch genutzt.
+// STRENG: nur echte Gegenspieler über verschiedene Muskelgruppen hinweg.
+// Bewusst NICHT erlaubt: legs+legs, core+core (das wären nur zwei harte Übungen
+// hintereinander ohne Erholungseffekt). Arme werden mit Druck/Zug gepaart.
+const ANTAGONIST = {
+  chest:['back'],
+  back:['chest','shoulders'],
+  shoulders:['back'],
+  arms:['arms'],            // Bizeps<->Trizeps: einzige sinnvolle Ausnahme innerhalb einer Gruppe
+  legs:[],                  // kein legs+legs
+  core:[]                   // kein core+core
+};
+function isAntagonistPair(a,b){
+  const pa=primaryMuscle(a), pb=primaryMuscle(b);
+  if(!pa||!pb) return false;
+  const allowed=ANTAGONIST[pa]||[];
+  if(!allowed.includes(pb)) return false;
+  // Sonderfall Arme: nur Bizeps(pull) <-> Trizeps(push) paaren, nicht zweimal dasselbe
+  if(pa==='arms'&&pb==='arms'){
+    const aPush=(a.g||[]).includes('push'), bPush=(b.g||[]).includes('push');
+    const aPull=(a.g||[]).includes('pull'), bPull=(b.g||[]).includes('pull');
+    return (aPush&&bPull&&!aPull) || (aPull&&bPush&&!bPull);
+  }
+  return true;
+}
+// Equipment-Typ einer Übung grob bestimmen (für "kein Umbau"-Präferenz)
+function equipType(ex){
+  const e=ex.equip||[];
+  if(e.length===0) return 'body';
+  if(e.includes('bb')) return 'bb';
+  if(e.includes('dbH')||e.includes('dbL')||e.includes('dbEITHER')) return 'db';
+  if(e.includes('band')) return 'band';
+  if(e.includes('abtr')) return 'abtr';
+  if(e.includes('bench')) return 'bench';
+  return e[0];
+}
+// Muskelgruppen-Größe für Reihenfolge (groß zuerst)
+const MUSCLE_SIZE = { legs:5, back:4, chest:4, shoulders:3, arms:2, core:1 };
+function muscleSize(ex){ const p=primaryMuscle(ex); return MUSCLE_SIZE[p]||0; }
+
+// Bildet aus einer Übungsliste Supersatz-Paare (nur echte Gegenspieler, streng).
+// Rückgabe: { blocks:[ {type:'superset',a,b} | {type:'single',ex} ], } - große Muskeln zuerst.
+function buildSupersets(list){
+  const remaining=list.slice();
+  const pairs=[];
+  const singles=[];
+  // Paar-Qualität bewerten: echte Gegenspieler (versch. Muskelgruppe) > gleiche Gruppe;
+  // gleicher Equipment-Typ gibt Bonus (kein Umbau nötig).
+  function pairScore(a,b){
+    if(!isAntagonistPair(a,b)) return -1;
+    const pa=primaryMuscle(a), pb=primaryMuscle(b);
+    let s = (pa!==pb) ? 10 : 6;              // echte Gegenspieler bevorzugt (Arme-Sonderfall etwas darunter)
+    if(equipType(a)===equipType(b)) s += 5;  // kein Hantel-Umbau
+    return s;
+  }
+  // Global bestes Matching: immer das insgesamt beste Paar zuerst binden
+  while(true){
+    let bestScore=-1, bi=-1, bj=-1;
+    for(let i=0;i<remaining.length;i++){
+      for(let j=i+1;j<remaining.length;j++){
+        const s=pairScore(remaining[i],remaining[j]);
+        if(s>bestScore){ bestScore=s; bi=i; bj=j; }
+      }
+    }
+    if(bestScore<0) break;                   // kein gültiges Paar mehr
+    const b=remaining.splice(bj,1)[0];
+    const a=remaining.splice(bi,1)[0];
+    pairs.push({type:'superset',a,b});
+  }
+  remaining.forEach(function(ex){ singles.push({type:'single',ex:ex}); });
+  // Reihenfolge: Blöcke nach größter Muskelgruppe zuerst
+  function blockSize(bl){
+    if(bl.type==='superset') return Math.max(muscleSize(bl.a),muscleSize(bl.b));
+    return muscleSize(bl.ex);
+  }
+  const blocks=pairs.concat(singles).sort((x,y)=>blockSize(y)-blockSize(x));
+  return blocks;
 }
 
 // =============== PLAN BUILDER ===============
@@ -754,7 +866,10 @@ function buildPlan(cfg){
   if(wantCore&&coreEx.length){finisher=pickOne(coreEx);}
   const outdoor=picked.filter(e=>e.outdoor);
   const indoor=picked.filter(e=>!e.outdoor);
-  return {focusLabel,goal,indoor,outdoor,finisher,cfg};
+  // Supersatz-Blöcke nur für Indoor-Übungen, wenn aktiv
+  let blocks=null;
+  if(cfg.superset){ blocks=buildSupersets(indoor); }
+  return {focusLabel,goal,indoor,outdoor,finisher,cfg,blocks};
 }
 
 function warmupFor(targets){
@@ -810,7 +925,8 @@ function renderPlanHtml(plan,ctxId){
   const {focusLabel,goal,indoor,outdoor,finisher,cfg}=plan;
   if(indoor.length===0&&outdoor.length===0)return '<div class="result"><div class="block empty">Zu wenige Übungen für diese Kombination. Andere Auswahl oder Draußen-Equipment aktivieren.</div></div>';
   let targets=cfg.muscles&&cfg.muscles.length?cfg.muscles:({push:['chest','shoulders','arms'],pull:['back','arms'],legs:['legs','core'],full:['chest','back','shoulders','legs','core','arms']}[cfg.split]);
-  const pulse=cfg.pulse?`<div class="pulse"><strong>♥ Kreislauf-Regeln</strong>RPE 7–8 statt Maximallast · bei jeder Wiederholung ausatmen · nach Boden-Übungen 3 Sek. sitzen bleiben. Bei Schwindel Pause und ggf. ärztlich abklären.</div>`:'';
+  const ssPulseAdd=cfg.superset?' Supersätze halten den Puls höher: bei Bedarf länger pausieren.':'';
+  const pulse=cfg.pulse?`<div class="pulse"><strong>♥ Kreislauf-Regeln</strong>RPE 7–8 statt Maximallast · bei jeder Wiederholung ausatmen · nach Boden-Übungen 3 Sek. sitzen bleiben. Bei Schwindel Pause und ggf. ärztlich abklären.${ssPulseAdd}</div>`:'';
   const ctx={goal,ctxId};
   let warmHtml=`<div class="block"><span class="block-label warm">Warm-up · 3–5 Min.</span><div class="block-hint">${warmupFor(targets)}</div></div>`;
   let outHtml='';
@@ -818,8 +934,31 @@ function renderPlanHtml(plan,ctxId){
     let rows=outdoor.map((e,i)=>renderExRow(e,i+1,ctx)).join('');
     outHtml=`<div class="block"><span class="block-label out">🌤️ Draußen-Block</span><div class="block-hint">Klimmzüge / Battle Rope am Stück draußen – danach zurück nach drinnen. Nur bei trockenem Wetter.</div>${rows}</div>`;
   }
-  let inRows=indoor.map((e,i)=>renderExRow(e,i+1,ctx)).join('');
-  let inHtml=`<div class="block"><span class="block-label">${outdoor.length?'Drinnen-Block':'Hauptblock'}</span><div class="block-hint">${goal.note}</div>${inRows}</div>`;
+  let inHtml='';
+  if(cfg.superset && plan.blocks && plan.blocks.length){
+    // Supersatz-Darstellung: Paare als Block gruppiert, Einzelübungen normal
+    let ssNum=0, singleNum=0, parts='';
+    plan.blocks.forEach(function(bl){
+      if(bl.type==='superset'){
+        ssNum++;
+        const rowA=renderExRow(bl.a,1,ctx);
+        const rowB=renderExRow(bl.b,2,ctx);
+        parts+=`<div class="ss-block">
+          <div class="ss-head">Supersatz ${ssNum} · ohne Pause dazwischen</div>
+          ${rowA}${rowB}
+          <div class="ss-rest">Danach Pause: ${SS_REST}</div>
+        </div>`;
+      }else{
+        singleNum++;
+        parts+=`<div class="ss-single">${renderExRow(bl.ex,singleNum,ctx)}</div>`;
+      }
+    });
+    const failHint = cfg.failure ? `<div class="ss-warn"><strong>⚠️ Bis Muskelversagen (letzter Satz)</strong>Training bis zum Muskelversagen erhöht Blutdruck und Kreislaufbelastung deutlich, besonders in Supersätzen. Wenn du zu Schwindel oder Kreislaufproblemen neigst, wird davon abgeraten. Für Muskelaufbau reicht es, 1 bis 2 Wiederholungen vor dem Versagen aufzuhören. Nur schmerzfrei und bei stabilem Kreislauf einsetzen.</div>` : '';
+    inHtml=`<div class="block"><span class="block-label ss">⚡ ${outdoor.length?'Drinnen-Block':'Hauptblock'} · Supersätze</span><div class="block-hint">Je zwei Übungen direkt hintereinander ohne Pause, danach ${SS_REST} Pause. Übungen ohne passenden Gegenspieler laufen einzeln.</div>${failHint}${parts}</div>`;
+  }else{
+    let inRows=indoor.map((e,i)=>renderExRow(e,i+1,ctx)).join('');
+    inHtml=`<div class="block"><span class="block-label">${outdoor.length?'Drinnen-Block':'Hauptblock'}</span><div class="block-hint">${goal.note}</div>${inRows}</div>`;
+  }
   let finHtml='';
   if(finisher)finHtml=`<div class="block"><span class="block-label fin">Core-Finisher</span><div class="block-hint">3 Runden zum Abschluss. Bei Zeitmangel weglassen.</div>${renderExRow(finisher,1,ctx,true)}</div>`;
   const eqSet=new Set(cfg.equip||[]);
@@ -830,7 +969,7 @@ function renderPlanHtml(plan,ctxId){
   else if(outdoor.length&&cfg.outpos){body+=inHtml+outHtml;}
   else{body+=inHtml;}
   body+=finHtml;
-  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ${cfg.dur} Min · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Core-Finisher':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
+  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ${cfg.dur} Min · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Core-Finisher':''}${cfg.superset&&plan.blocks?' · '+plan.blocks.filter(b=>b.type==='superset').length+' Supersätze':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
   <div class="actions"><button class="act primary" data-act="print">Als PDF / Drucken</button><button class="act" data-act="regen">Neue Variante ⟳</button></div>`;
 }
 
@@ -847,10 +986,20 @@ function doSwap(btn){
   const usedNames=plan.indoor.concat(plan.outdoor).map(e=>e.n);
   const db=activeDB();
   const cur=db.find(e=>e.n===curName)||arr[idx];
-  const pool=db.filter(e=>exAllowed(e,eq)&&usedNames.indexOf(e.n)===-1&&(!!e.outdoor===!!isOutdoor)&&e.m.some(m=>cur.m.indexOf(m)!==-1)&&(!e.adv||plan.cfg.advanced));
+  let pool=db.filter(e=>exAllowed(e,eq)&&usedNames.indexOf(e.n)===-1&&(!!e.outdoor===!!isOutdoor)&&e.m.some(m=>cur.m.indexOf(m)!==-1)&&(!e.adv||plan.cfg.advanced));
   if(!pool.length){alert('Keine passende Alternative verfügbar für diese Muskelgruppe.');return;}
+  // Bei Supersätzen: gleicher primärer Muskel + möglichst gleicher Equipment-Typ, damit Paarung erhalten bleibt
+  if(plan.cfg.superset){
+    const samePrim=pool.filter(e=>primaryMuscle(e)===primaryMuscle(cur));
+    if(samePrim.length){
+      const sameEq=samePrim.filter(e=>equipType(e)===equipType(cur));
+      pool = sameEq.length ? sameEq : samePrim;
+    }
+  }
   const repl=pool[Math.floor(Math.random()*pool.length)];
   arr[idx]=repl;
+  // Supersatz-Blöcke nach dem Tausch neu bilden
+  if(plan.cfg.superset){ plan.blocks=buildSupersets(plan.indoor); }
   document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
 }
 
@@ -923,7 +1072,7 @@ function genProgram(){
       if(['padel','bike1','bike2','walk20','walk45'].includes(cfg.type)){
         weekDays.push({day:d,type:'activity',act:cfg.type});return;
       }
-      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced,prefFav:S.program.prefFav});
+      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced,prefFav:S.program.prefFav,superset:S.program.superset,failure:S.program.failure});
       weekDays.push({day:d,type:'training',split:cfg.type,plan,deload:isDeload});
     });
     programData.push({week:w,deload:isDeload,days:weekDays});
@@ -1216,6 +1365,10 @@ document.getElementById('p-weeks').value=S.program.weeks;
 document.getElementById('p-deload').checked=S.program.deload;
 if(document.getElementById('s-preffav'))document.getElementById('s-preffav').checked=!!S.single.prefFav;
 if(document.getElementById('p-preffav'))document.getElementById('p-preffav').checked=!!S.program.prefFav;
+if(document.getElementById('s-superset'))document.getElementById('s-superset').checked=!!S.single.superset;
+if(document.getElementById('s-failure'))document.getElementById('s-failure').checked=!!S.single.failure;
+if(document.getElementById('p-superset'))document.getElementById('p-superset').checked=!!S.program.superset;
+if(document.getElementById('p-failure'))document.getElementById('p-failure').checked=!!S.program.failure;
 if(document.getElementById('s-advanced'))document.getElementById('s-advanced').checked=!!S.single.advanced;
 if(document.getElementById('p-advanced'))document.getElementById('p-advanced').checked=!!S.program.advanced;
 </script>
