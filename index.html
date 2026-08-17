@@ -862,14 +862,26 @@ function buildPlan(cfg){
     const p=pickOne(pool2);if(!p)break;picked.push(p);used.add(p.n);
     pool2=pool2.filter(e=>!used.has(e.n));
   }
-  let finisher=null;
-  if(wantCore&&coreEx.length){finisher=pickOne(coreEx);}
+  let finisher=null, finishers=[];
+  if(wantCore&&coreEx.length){
+    // 2-3 Finisher-Übungen (je nach Verfügbarkeit)
+    const want=coreEx.length>=3?3:coreEx.length;
+    const usedFin=new Set();
+    let fpool=coreEx.slice();
+    while(finishers.length<want&&fpool.length){
+      const f=pickOne(fpool);
+      if(!f)break;
+      finishers.push(f); usedFin.add(f.n);
+      fpool=fpool.filter(e=>!usedFin.has(e.n));
+    }
+    finisher=finishers.length?finishers[0]:null;
+  }
   const outdoor=picked.filter(e=>e.outdoor);
   const indoor=picked.filter(e=>!e.outdoor);
   // Supersatz-Blöcke nur für Indoor-Übungen, wenn aktiv
   let blocks=null;
   if(cfg.superset){ blocks=buildSupersets(indoor); }
-  return {focusLabel,goal,indoor,outdoor,finisher,cfg,blocks};
+  return {focusLabel,goal,indoor,outdoor,finisher,finishers,cfg,blocks};
 }
 
 function warmupFor(targets){
@@ -882,7 +894,7 @@ function warmupFor(targets){
   return '90 Sek. lockeres Springen/Hampelmänner + 90 Sek. '+parts.join(', ')+' + 1 leichter Satz der ersten Übung.';
 }
 
-function renderExRow(ex,idx,ctx,star){
+function renderExRow(ex,idx,ctx,star,noRest){
   const g=ctx.goal;
   let dose;
   if(ex.custom&&(ex.cSets||ex.cReps)){dose=(ex.cSets||g.sets)+' × '+(ex.cReps||g.reps);}
@@ -909,7 +921,7 @@ function renderExRow(ex,idx,ctx,star){
       </div>
       ${gifBox}
     </div>
-    <div class="ex-dose"><b>${dose}</b>Pause ${g.rest}</div>
+    <div class="ex-dose"><b>${dose}</b>${noRest?'<span style="color:var(--blue);font-weight:700;">direkt weiter</span>':'Pause '+g.rest}</div>
   </div>`;
 }
 
@@ -941,8 +953,8 @@ function renderPlanHtml(plan,ctxId){
     plan.blocks.forEach(function(bl){
       if(bl.type==='superset'){
         ssNum++;
-        const rowA=renderExRow(bl.a,1,ctx);
-        const rowB=renderExRow(bl.b,2,ctx);
+        const rowA=renderExRow(bl.a,1,ctx,false,true);
+        const rowB=renderExRow(bl.b,2,ctx,false,true);
         parts+=`<div class="ss-block">
           <div class="ss-head">Supersatz ${ssNum} · ohne Pause dazwischen</div>
           ${rowA}${rowB}
@@ -960,7 +972,11 @@ function renderPlanHtml(plan,ctxId){
     inHtml=`<div class="block"><span class="block-label">${outdoor.length?'Drinnen-Block':'Hauptblock'}</span><div class="block-hint">${goal.note}</div>${inRows}</div>`;
   }
   let finHtml='';
-  if(finisher)finHtml=`<div class="block"><span class="block-label fin">Core-Finisher</span><div class="block-hint">3 Runden zum Abschluss. Bei Zeitmangel weglassen.</div>${renderExRow(finisher,1,ctx,true)}</div>`;
+  const finList=(plan.finishers&&plan.finishers.length)?plan.finishers:(finisher?[finisher]:[]);
+  if(finList.length){
+    const finRows=finList.map(function(f,i){return renderExRow(f,i+1,ctx,true);}).join('');
+    finHtml=`<div class="block"><span class="block-label fin">Core-Finisher · ${finList.length} Übungen</span><div class="block-hint">2–3 Runden im Wechsel zum Abschluss. Bei Zeitmangel weglassen.</div>${finRows}</div>`;
+  }
   const eqSet=new Set(cfg.equip||[]);
   const isTravel=!eqSet.has('bb')&&!eqSet.has('dbH')&&!eqSet.has('abtr');
   const locTag=isTravel?'🏖️ Reisegepäck':'🏠 Training';
@@ -976,7 +992,9 @@ function renderPlanHtml(plan,ctxId){
 function doSwap(btn){
   const curName=decodeURIComponent(btn.getAttribute('data-ex'));
   const listKey=btn.getAttribute('data-list');
-  const plan=LAST_SINGLE;
+  // Im Wochenprogramm-Fenster den dort gezeigten Plan tauschen, sonst den Einzelplan
+  const inModal = !!(MODAL_PLAN && document.getElementById('progModal'));
+  const plan = inModal ? MODAL_PLAN : LAST_SINGLE;
   if(!plan){alert('Bitte zuerst einen Plan erstellen.');return;}
   const arr=listKey==='outdoor'?plan.outdoor:plan.indoor;
   const idx=arr.findIndex(e=>e.n===curName);
@@ -988,19 +1006,58 @@ function doSwap(btn){
   const cur=db.find(e=>e.n===curName)||arr[idx];
   let pool=db.filter(e=>exAllowed(e,eq)&&usedNames.indexOf(e.n)===-1&&(!!e.outdoor===!!isOutdoor)&&e.m.some(m=>cur.m.indexOf(m)!==-1)&&(!e.adv||plan.cfg.advanced));
   if(!pool.length){alert('Keine passende Alternative verfügbar für diese Muskelgruppe.');return;}
-  // Bei Supersätzen: gleicher primärer Muskel + möglichst gleicher Equipment-Typ, damit Paarung erhalten bleibt
   if(plan.cfg.superset){
-    const samePrim=pool.filter(e=>primaryMuscle(e)===primaryMuscle(cur));
-    if(samePrim.length){
-      const sameEq=samePrim.filter(e=>equipType(e)===equipType(cur));
-      pool = sameEq.length ? sameEq : samePrim;
+    // Ist die getauschte Übung aktuell in einem Supersatz oder ungepaart?
+    let inPair=false;
+    if(plan.blocks){
+      plan.blocks.forEach(function(b){
+        if(b.type==='superset'&&(b.a.n===curName||b.b.n===curName)) inPair=true;
+      });
+    }
+    if(inPair){
+      // Paar erhalten: gleicher primärer Muskel, möglichst gleiches Equipment
+      const samePrim=pool.filter(e=>primaryMuscle(e)===primaryMuscle(cur));
+      if(samePrim.length){
+        const sameEq=samePrim.filter(e=>equipType(e)===equipType(cur));
+        pool = sameEq.length ? sameEq : samePrim;
+      }
+    }else{
+      // Ungepaart: bevorzugt eine Übung wählen, die mit einer anderen ungepaarten Übung ein Paar bildet
+      const otherSingles=[];
+      if(plan.blocks){
+        plan.blocks.forEach(function(b){
+          if(b.type==='single'&&b.ex.n!==curName) otherSingles.push(b.ex);
+        });
+      }
+      const pairing=pool.filter(function(cand){
+        return otherSingles.some(function(o){ return isAntagonistPair(cand,o); });
+      });
+      if(pairing.length){
+        // unter den paarbildenden bevorzugt gleicher Equipment-Typ wie ein Partner
+        const nice=pairing.filter(function(cand){
+          return otherSingles.some(function(o){ return isAntagonistPair(cand,o)&&equipType(cand)===equipType(o); });
+        });
+        pool = nice.length ? nice : pairing;
+      }
     }
   }
   const repl=pool[Math.floor(Math.random()*pool.length)];
   arr[idx]=repl;
   // Supersatz-Blöcke nach dem Tausch neu bilden
   if(plan.cfg.superset){ plan.blocks=buildSupersets(plan.indoor); }
-  document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
+  if(inModal){
+    const modal=document.getElementById('progModal');
+    const holder=modal?modal.querySelector('.modal-plan'):null;
+    if(holder){ holder.innerHTML=renderPlanHtml(plan,'prog'); rewireModal(modal); }
+  }else{
+    document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
+  }
+}
+// Buttons im Modal nach Neu-Rendern wieder verknüpfen
+function rewireModal(modal){
+  if(!modal)return;
+  var rg=modal.querySelector('[data-act="regen"]');if(rg)rg.style.display='none';
+  var pr=modal.querySelector('[data-act="print"]');if(pr)pr.addEventListener('click',function(){window.print();});
 }
 
 function hideEx(encName){
@@ -1099,18 +1156,21 @@ function genProgram(){
   autoSave();
 }
 
+let MODAL_PLAN=null, MODAL_CTX=null;
 function showProgramDay(week,day){
   const wd=LAST_PROGRAM.find(x=>x.week===week);
   const dd=wd.days.find(x=>x.day===day);
   if(!dd||dd.type!=='training')return;
+  MODAL_PLAN=dd.plan; MODAL_CTX={week:week,day:day};
   const html=renderPlanHtml(dd.plan,'prog');
   const modal=document.createElement('div');
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;padding:20px 12px;';
-  modal.innerHTML=`<div style="max-width:900px;margin:0 auto;"><button class="act primary" id="modalClose" style="width:100%;margin-bottom:10px;">✕ Schließen</button><div style="background:#fff;border-radius:14px;overflow:hidden;padding:12px;font-weight:800;color:var(--deep);">${DAYFULL[day]} · Woche ${week}</div>${html}</div>`;
-  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  modal.innerHTML=`<div style="max-width:900px;margin:0 auto;"><button class="act primary" id="modalClose" style="width:100%;margin-bottom:10px;">✕ Schließen</button><div style="background:#fff;border-radius:14px;overflow:hidden;padding:12px;font-weight:800;color:var(--deep);">${DAYFULL[day]} · Woche ${week}</div><div class="modal-plan">${html}</div></div>`;
+  modal.addEventListener('click',function(e){if(e.target===modal){MODAL_PLAN=null;modal.remove();}});
   document.body.appendChild(modal);
+  modal.id='progModal';
   var cb=modal.querySelector('#modalClose');
-  if(cb)cb.addEventListener('click',function(){modal.remove();});
+  if(cb)cb.addEventListener('click',function(){MODAL_PLAN=null;modal.remove();});
   var rg=modal.querySelector('[data-act="regen"]');if(rg)rg.style.display='none';
   var pr=modal.querySelector('[data-act="print"]');if(pr)pr.addEventListener('click',function(){window.print();});
 }
@@ -1124,7 +1184,8 @@ function printWeek(week){
     else if(dd.type==='activity')html+=`<p>${ACTIVITIES[dd.act].icon} ${ACTIVITIES[dd.act].t} – ${ACTIVITIES[dd.act].sub}</p>`;
     else{
       const all=[...dd.plan.outdoor,...dd.plan.indoor];
-      if(dd.plan.finisher)all.push(dd.plan.finisher);
+      if(dd.plan.finishers&&dd.plan.finishers.length)dd.plan.finishers.forEach(function(f){all.push(f);});
+      else if(dd.plan.finisher)all.push(dd.plan.finisher);
       html+='<ol style="margin-left:18px;font-size:13px;">'+all.map(e=>`<li style="margin:4px 0;"><b>${e.n}</b> – ${dd.plan.goal.sets}×${dd.plan.goal.reps}, Pause ${dd.plan.goal.rest}<br><span style="color:#888;font-size:11px;">${e.cue}</span></li>`).join('')+'</ol>';
     }
     html+='</div>';
