@@ -849,14 +849,18 @@ function buildPlan(cfg){
   }
   const coreEx=cands.filter(e=>e.m.includes('core')&&!e.outdoor);
   const nonCore=cands.filter(e=>!(e.m.length===1&&e.m[0]==='core'));
+  const wantCore=targets.includes('core');
+  // Der Finisher ist ein eigener Block und zieht KEINE Übung vom Hauptteil ab,
+  // damit die Übungszahl im Hauptteil gerade bleibt (wichtig für Supersätze).
+  const mainCount=count;
+  // Grundabdeckung: je Zielmuskel eine Übung, aber nie mehr als mainCount
   targets.forEach(m=>{
     if(m==='core')return;
+    if(picked.length>=mainCount)return;
     const pool=nonCore.filter(e=>e.m.includes(m)&&!used.has(e.n));
     const p=pickOne(pool);
     if(p){picked.push(p);used.add(p.n);}
   });
-  const wantCore=targets.includes('core');
-  const mainCount=wantCore?count-1:count;
   let pool2=nonCore.filter(e=>!used.has(e.n));
   while(picked.length<mainCount&&pool2.length){
     const p=pickOne(pool2);if(!p)break;picked.push(p);used.add(p.n);
@@ -876,6 +880,8 @@ function buildPlan(cfg){
     }
     finisher=finishers.length?finishers[0]:null;
   }
+  // Sicherheitsnetz: nie mehr als die vorgesehene Anzahl
+  if(picked.length>mainCount) picked.length=mainCount;
   const outdoor=picked.filter(e=>e.outdoor);
   const indoor=picked.filter(e=>!e.outdoor);
   // Supersatz-Blöcke nur für Indoor-Übungen, wenn aktiv
