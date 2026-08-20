@@ -116,6 +116,9 @@ label.fld{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.
 .block-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:#fff;background:var(--blue);display:inline-block;padding:4px 12px;border-radius:6px;margin-bottom:4px;}
 .block-label.warm{background:var(--green);}
 .block-label.ss{background:var(--blue);color:#fff;}
+.al-chart{margin:4px 0 8px;}
+.al-chart-head{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+.al-chart-svg{width:100%;height:70px;display:block;background:#fff;border-radius:6px;border:1px solid rgba(0,43,73,.08);}
 .al-loghist{margin-top:8px;padding:8px 10px;background:#F4F8FB;border-radius:8px;}
 .al-loghead{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--deep);margin-bottom:5px;}
 .log-row{display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0;border-bottom:1px solid rgba(0,43,73,.07);}
@@ -541,7 +544,7 @@ function handleAction(el){
   if(!el)return;
   var act=el.getAttribute('data-act');
   if(act==='swap'){doSwap(el);}
-  else if(act==='hide'){hideEx(el.getAttribute('data-ex'));}
+  else if(act==='hide'){hideEx(el.getAttribute('data-ex'),el.getAttribute('data-list'));}
   else if(act==='print'){printPlan();}
   else if(act==='regen'){genSingle();}
   else if(act==='printweek'){printWeek(parseInt(el.getAttribute('data-week')));}
@@ -862,6 +865,25 @@ function buildSupersets(list){
   return blocks;
 }
 
+// Finisher-Pools nach Namensmuster (global, genutzt von buildPlan und doSwap)
+function isPulseFin(e){
+  const n=e.n.toLowerCase();
+  return n.indexOf('mountain climber')!==-1||n.indexOf('burpee')!==-1||n.indexOf('battle rope')!==-1||
+         n.indexOf('hampelmänner')!==-1||n.indexOf('high knees')!==-1||n.indexOf('sprung')!==-1;
+}
+function isCoreFin(e){
+  if(e.outdoor)return false;
+  const n=e.n.toLowerCase();
+  return (e.m.includes('core')&&!isPulseFin(e))||n.indexOf('carry')!==-1||n.indexOf("farmer's walk")!==-1;
+}
+// Liefert den Finisher-Pool für eine Art, gefiltert nach Equipment & gesperrten Übungen
+function finisherPool(ftype,eq){
+  const db=activeDB();
+  return db.filter(function(e){
+    return exAllowed(e,eq)&&!e.outdoor&&(ftype==='pulse'?isPulseFin(e):isCoreFin(e));
+  });
+}
+
 // =============== PLAN BUILDER ===============
 function buildPlan(cfg){
   const eq=makeEq(cfg.equip);
@@ -898,18 +920,7 @@ function buildPlan(cfg){
   }
   const coreEx=cands.filter(e=>e.m.includes('core')&&!e.outdoor);
   const nonCore=cands.filter(e=>!(e.m.length===1&&e.m[0]==='core'));
-  // Finisher-Pools nach Namensmuster (unabhängig vom Equipment/Fokus)
-  function isPulseFin(e){
-    const n=e.n.toLowerCase();
-    return n.indexOf('mountain climber')!==-1||n.indexOf('burpee')!==-1||n.indexOf('battle rope')!==-1||
-           n.indexOf('hampelmänner')!==-1||n.indexOf('high knees')!==-1||n.indexOf('sprung')!==-1;
-  }
-  function isCoreFin(e){
-    if(e.outdoor)return false;
-    const n=e.n.toLowerCase();
-    // Core-/Stabilitäts-Finisher: Planks, Halte, Beinheben, Carries
-    return (e.m.includes('core')&&!isPulseFin(e))||n.indexOf('carry')!==-1||n.indexOf("farmer's walk")!==-1;
-  }
+  // (Finisher-Pool-Funktionen global, siehe unten)
   const wantCore=targets.includes('core');
   // Der Finisher ist ein eigener Block und zieht KEINE Übung vom Hauptteil ab,
   // damit die Übungszahl im Hauptteil gerade bleibt (wichtig für Supersätze).
@@ -998,6 +1009,20 @@ function isBodyweight(ex){
   if(e.length===0)return true;
   return e.every(function(c){return c==='pullup'||c==='bench';});
 }
+// Hat die Übung ein einstellbares Zusatzgewicht (kg)? Nur Hantel/Langhantel.
+// Battle Rope, Band, Bauchtrainer, Körpergewicht -> KEIN kg-Feld.
+function hasWeight(ex){
+  const e=ex.equip||[];
+  if(e.length===0)return false;                 // Körpergewicht
+  // Nur diese Equipment-Typen bedeuten einstellbares Gewicht:
+  return e.some(function(c){
+    return c==='bb'||c==='dbH'||c==='dbL'||c==='dbEITHER';
+  });
+}
+// Wird die Übung in Zeit/Dauer gemessen? (nutzt bestehende Erkennung)
+function isDurationBased(ex){
+  return isHoldExercise(ex)||isTimeExercise(ex);
+}
 function lastLog(exName){
   const arr=(S.logs&&S.logs[exName])||[];
   return arr.length?arr[arr.length-1]:null;
@@ -1047,7 +1072,7 @@ function renderExRow(ex,idx,ctx,star,noRest){
   }
   else{dose=g.sets+' × '+g.reps;}
   const numCell=star?'<div class="ex-n" style="background:var(--red);color:#fff">★</div>':`<div class="ex-n">${idx}</div>`;
-  const listKey=ex.outdoor?'outdoor':'indoor';
+  const listKey=star?'finisher':(ex.outdoor?'outdoor':'indoor');
   const enc=encodeURIComponent(ex.n);
   const isFav=(S.favEx||[]).indexOf(ex.n)!==-1;
   const note=(S.exComments||{})[ex.n];
@@ -1058,13 +1083,14 @@ function renderExRow(ex,idx,ctx,star,noRest){
   const gifBox=ex.gif?`<div class="ex-gif-box"><img src="${ex.gif}" alt="${ex.n}" loading="lazy"></div>`:'';
 
   // Trainingslog-Eingabe: vorausgefüllt mit letztem Wert
-  const bw=isBodyweight(ex);
+  const showW=hasWeight(ex);
+  const durBased=isDurationBased(ex);
   const last=lastLog(ex.n);
   const lastW=(last&&last.w!==null&&last.w!==undefined)?last.w:'';
   const lastR=(last&&last.r!==null&&last.r!==undefined)?last.r:'';
-  const lastHint=last?`<div class="log-last">letztes Mal (${last.d}): ${last.w!==null&&last.w!==undefined?last.w+' kg · ':''}${last.r||'—'}${bw?'':''}</div>`:'';
-  const wField=bw?'':`<input type="number" inputmode="decimal" class="log-in" data-logex="${enc}" data-logfield="w" value="${lastW}" placeholder="kg ges." aria-label="Gewicht gesamt in kg">`;
-  const rField=`<input type="text" inputmode="numeric" class="log-in" data-logex="${enc}" data-logfield="r" value="${lastR}" placeholder="${isHoldExercise(ex)||isTimeExercise(ex)?'Sek.':'Wdh.'}" aria-label="Wiederholungen oder Zeit">`;
+  const lastHint=last?`<div class="log-last">letztes Mal (${last.d}): ${last.w!==null&&last.w!==undefined?last.w+' kg · ':''}${last.r||'—'}</div>`:'';
+  const wField=showW?`<input type="number" inputmode="decimal" class="log-in" data-logex="${enc}" data-logfield="w" value="${lastW}" placeholder="kg ges." aria-label="Gewicht gesamt in kg">`:'';
+  const rField=`<input type="text" inputmode="numeric" class="log-in" data-logex="${enc}" data-logfield="r" value="${lastR}" placeholder="${durBased?'Sek.':'Wdh.'}" aria-label="${durBased?'Zeit in Sekunden':'Wiederholungen'}">`;
   const logHtml=`<div class="ex-log">${lastHint}<div class="log-fields">${wField}${rField}</div></div>`;
 
   return `<div class="ex" data-exname="${enc}" data-list="${listKey}">
@@ -1187,6 +1213,15 @@ function renderPlanHtml(plan,ctxId){
   <div class="actions"><button class="act primary" data-act="print">Als PDF / Drucken</button><button class="act" data-act="regen">Neue Variante ⟳</button></div>`;
 }
 
+function rerenderPlan(plan,inModal){
+  if(inModal){
+    const modal=document.getElementById('progModal');
+    const holder=modal?modal.querySelector('.modal-plan'):null;
+    if(holder){ holder.innerHTML=renderPlanHtml(plan,'prog'); rewireModal(modal); }
+  }else{
+    document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
+  }
+}
 function doSwap(btn){
   const curName=decodeURIComponent(btn.getAttribute('data-ex'));
   const listKey=btn.getAttribute('data-list');
@@ -1194,6 +1229,24 @@ function doSwap(btn){
   const inModal = !!(MODAL_PLAN && document.getElementById('progModal'));
   const plan = inModal ? MODAL_PLAN : LAST_SINGLE;
   if(!plan){alert('Bitte zuerst einen Plan erstellen.');return;}
+  // --- Finisher-Tausch: Ersatz aus derselben Finisher-Art ---
+  if(listKey==='finisher'){
+    if(!plan.finishers||!plan.finishers.length)return;
+    const fidx=plan.finishers.findIndex(e=>e.n===curName);
+    if(fidx===-1)return;
+    const eqF=makeEq(plan.cfg.equip);
+    const ftype=plan.cfg.finisherType||'core';
+    const inFinisher=new Set(plan.finishers.map(e=>e.n));
+    const hidden=new Set(S.hiddenEx||[]);
+    const pool=finisherPool(ftype,eqF).filter(function(e){
+      return !inFinisher.has(e.n)&&!hidden.has(e.n)&&(!e.adv||plan.cfg.advanced);
+    });
+    if(!pool.length){ alert('Keine weitere Übung für diesen Finisher verfügbar.'); return; }
+    plan.finishers[fidx]=pool[Math.floor(Math.random()*pool.length)];
+    plan.finisher=plan.finishers[0];
+    rerenderPlan(plan,inModal);
+    return;
+  }
   const arr=listKey==='outdoor'?plan.outdoor:plan.indoor;
   const idx=arr.findIndex(e=>e.n===curName);
   if(idx===-1){return;}
@@ -1243,13 +1296,7 @@ function doSwap(btn){
   arr[idx]=repl;
   // Supersatz-Blöcke nach dem Tausch neu bilden
   if(plan.cfg.superset){ plan.blocks=buildSupersets(plan.indoor); }
-  if(inModal){
-    const modal=document.getElementById('progModal');
-    const holder=modal?modal.querySelector('.modal-plan'):null;
-    if(holder){ holder.innerHTML=renderPlanHtml(plan,'prog'); rewireModal(modal); }
-  }else{
-    document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
-  }
+  rerenderPlan(plan,inModal);
 }
 // Buttons im Modal nach Neu-Rendern wieder verknüpfen
 function rewireModal(modal){
@@ -1258,11 +1305,33 @@ function rewireModal(modal){
   var pr=modal.querySelector('[data-act="print"]');if(pr)pr.addEventListener('click',function(){window.print();});
 }
 
-function hideEx(encName){
+function hideEx(encName,listKey){
   const n=decodeURIComponent(encName);
   if(!S.hiddenEx.includes(n))S.hiddenEx.push(n);
-  if(LAST_SINGLE)genSingle();
   autoSave();
+  // Finisher-Übung gesperrt: gezielt nur im Finisher ersetzen (Plan nicht neu würfeln)
+  if(listKey==='finisher'){
+    const inModal=!!(MODAL_PLAN&&document.getElementById('progModal'));
+    const plan=inModal?MODAL_PLAN:LAST_SINGLE;
+    if(plan&&plan.finishers){
+      const fidx=plan.finishers.findIndex(e=>e.n===n);
+      if(fidx!==-1){
+        const eqF=makeEq(plan.cfg.equip);
+        const ftype=plan.cfg.finisherType||'core';
+        const inFinisher=new Set(plan.finishers.map(e=>e.n));
+        const hidden=new Set(S.hiddenEx||[]);
+        const pool=finisherPool(ftype,eqF).filter(function(e){
+          return !inFinisher.has(e.n)&&!hidden.has(e.n)&&(!e.adv||plan.cfg.advanced);
+        });
+        if(pool.length){ plan.finishers[fidx]=pool[Math.floor(Math.random()*pool.length)]; }
+        else { plan.finishers.splice(fidx,1); }  // kein Ersatz -> Finisher-Übung entfällt
+        plan.finisher=plan.finishers.length?plan.finishers[0]:null;
+        rerenderPlan(plan,inModal);
+      }
+    }
+    return;
+  }
+  if(LAST_SINGLE)genSingle();
 }
 
 function printPlan(){
@@ -1531,9 +1600,33 @@ function exMatchesEquip(ex,ef){
   if(ef==='dbEITHER')return ex.equip.indexOf('dbEITHER')!==-1||ex.equip.indexOf('dbH')!==-1||ex.equip.indexOf('dbL')!==-1;
   return ex.equip.indexOf(ef)!==-1;
 }
+// Kleine SVG-Linie: Gewicht über Zeit, letzte 15 Einträge mit kg
+function renderWeightChart(arr){
+  const withW=arr.filter(function(e){return e.w!==null&&e.w!==undefined;});
+  const pts=withW.slice(-15); // letzte 15
+  if(pts.length<2)return ''; // Linie braucht mind. 2 Punkte
+  const W=260,H=70,padL=6,padR=6,padT=8,padB=8;
+  const ws=pts.map(function(e){return e.w;});
+  let minW=Math.min.apply(null,ws), maxW=Math.max.apply(null,ws);
+  if(minW===maxW){minW=minW-1;maxW=maxW+1;} // flache Linie vermeiden
+  const innerW=W-padL-padR, innerH=H-padT-padB;
+  const coords=pts.map(function(e,i){
+    const x=padL+(pts.length===1?innerW/2:innerW*i/(pts.length-1));
+    const y=padT+innerH*(1-(e.w-minW)/(maxW-minW));
+    return {x:x,y:y,w:e.w};
+  });
+  const path=coords.map(function(c,i){return (i===0?'M':'L')+c.x.toFixed(1)+' '+c.y.toFixed(1);}).join(' ');
+  const dots=coords.map(function(c){return '<circle cx="'+c.x.toFixed(1)+'" cy="'+c.y.toFixed(1)+'" r="2.5" fill="var(--blue)"/>';}).join('');
+  const first=pts[0].w, lastP=pts[pts.length-1].w;
+  const trend=lastP>first?'↗':(lastP<first?'↘':'→');
+  return '<div class="al-chart"><div class="al-chart-head">Gewicht '+minW+'–'+maxW+' kg '+trend+'</div>'+
+    '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" class="al-chart-svg">'+
+    '<path d="'+path+'" fill="none" stroke="var(--blue)" stroke-width="2"/>'+dots+'</svg></div>';
+}
 function renderLogHistory(exName){
   const arr=(S.logs&&S.logs[exName])||[];
   if(!arr.length)return '';
+  const chart=renderWeightChart(arr);
   // neueste zuerst, max 8 Einträge zeigen
   const rows=arr.slice().reverse().slice(0,8).map(function(e){
     const w=(e.w!==null&&e.w!==undefined)?e.w+' kg':'—';
@@ -1541,7 +1634,7 @@ function renderLogHistory(exName){
     return '<div class="log-row"><span class="log-date">'+e.d+'</span><span class="log-val">'+w+' · '+r+'</span></div>';
   }).join('');
   const more=arr.length>8?'<div class="log-more">… und '+(arr.length-8)+' weitere</div>':'';
-  return '<div class="al-loghist"><div class="al-loghead">📊 Verlauf</div>'+rows+more+'</div>';
+  return '<div class="al-loghist"><div class="al-loghead">📊 Verlauf</div>'+chart+rows+more+'</div>';
 }
 function renderAlle(){
   const list=document.getElementById('al-list');
