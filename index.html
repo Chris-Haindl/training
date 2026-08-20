@@ -312,6 +312,14 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <label class="switch"><input type="checkbox" id="s-failure"><span class="slider"></span></label>
       <span>Letzter Satz bis Muskelversagen <span style="color:var(--red);">⚠️</span></span>
     </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="s-finisher" checked><span class="slider"></span></label>
+      <span>Finisher hinzufügen (2–3 Übungen zum Abschluss)</span>
+    </div>
+    <div id="s-finType" class="opt-grid" style="margin-top:8px;">
+      <div class="opt sel" data-fintype="core">Core / Stabilität</div>
+      <div class="opt" data-fintype="pulse">Kondition / Puls</div>
+    </div>
   </div>
 
   <button type="button" class="genbtn" data-act="gensingle">Plan erstellen ⚡</button>
@@ -346,6 +354,14 @@ canvas{width:100%;height:auto;margin-top:10px;}
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="p-failure"><span class="slider"></span></label>
       <span>Letzter Satz bis Muskelversagen <span style="color:var(--red);">⚠️</span></span>
+    </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-finisher" checked><span class="slider"></span></label>
+      <span>Finisher hinzufügen (2–3 Übungen zum Abschluss)</span>
+    </div>
+    <div id="p-finType" class="opt-grid" style="margin-top:8px;">
+      <div class="opt sel" data-fintype="core">Core / Stabilität</div>
+      <div class="opt" data-fintype="pulse">Kondition / Puls</div>
     </div>
     <div class="mini" style="margin-top:14px;">Equipment fürs ganze Programm:</div>
     <div class="opt-grid" style="margin-bottom:10px;">
@@ -562,8 +578,8 @@ const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", 
 
 // =============== STATE ===============
 let S = {
-  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'6',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false,superset:false,failure:false},
-  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'6',days:{},advanced:false,prefFav:false,superset:false,failure:false},
+  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'6',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false,superset:false,failure:false,finisher:true,finisherType:'core'},
+  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'6',days:{},advanced:false,prefFav:false,superset:false,failure:false,finisher:true,finisherType:'core'},
   customEx:[],
   hiddenEx:[],
   favEx:[],
@@ -693,6 +709,8 @@ document.getElementById('s-advanced').addEventListener('change',e=>S.single.adva
 document.getElementById('s-preffav').addEventListener('change',e=>S.single.prefFav=e.target.checked);
 document.getElementById('s-superset').addEventListener('change',e=>S.single.superset=e.target.checked);
 document.getElementById('s-failure').addEventListener('change',e=>S.single.failure=e.target.checked);
+document.getElementById('s-finisher').addEventListener('change',function(e){S.single.finisher=e.target.checked;var t=document.getElementById('s-finType');if(t)t.style.opacity=e.target.checked?'1':'0.4';});
+document.querySelectorAll('#s-finType .opt').forEach(el=>el.addEventListener('click',function(){document.querySelectorAll('#s-finType .opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.single.finisherType=el.dataset.fintype;}));
 
 // program opts
 document.querySelectorAll('#p-goalOpts .opt').forEach(el=>el.addEventListener('click',()=>{
@@ -707,6 +725,8 @@ document.getElementById('p-advanced').addEventListener('change',e=>S.program.adv
 document.getElementById('p-preffav').addEventListener('change',e=>S.program.prefFav=e.target.checked);
 document.getElementById('p-superset').addEventListener('change',e=>S.program.superset=e.target.checked);
 document.getElementById('p-failure').addEventListener('change',e=>S.program.failure=e.target.checked);
+document.getElementById('p-finisher').addEventListener('change',function(e){S.program.finisher=e.target.checked;var t=document.getElementById('p-finType');if(t)t.style.opacity=e.target.checked?'1':'0.4';});
+document.querySelectorAll('#p-finType .opt').forEach(el=>el.addEventListener('click',function(){document.querySelectorAll('#p-finType .opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.program.finisherType=el.dataset.fintype;}));
 
 // custom muscle select
 let customMuscles=[];
@@ -851,6 +871,18 @@ function buildPlan(cfg){
   }
   const coreEx=cands.filter(e=>e.m.includes('core')&&!e.outdoor);
   const nonCore=cands.filter(e=>!(e.m.length===1&&e.m[0]==='core'));
+  // Finisher-Pools nach Namensmuster (unabhängig vom Equipment/Fokus)
+  function isPulseFin(e){
+    const n=e.n.toLowerCase();
+    return n.indexOf('mountain climber')!==-1||n.indexOf('burpee')!==-1||n.indexOf('battle rope')!==-1||
+           n.indexOf('hampelmänner')!==-1||n.indexOf('high knees')!==-1||n.indexOf('sprung')!==-1;
+  }
+  function isCoreFin(e){
+    if(e.outdoor)return false;
+    const n=e.n.toLowerCase();
+    // Core-/Stabilitäts-Finisher: Planks, Halte, Beinheben, Carries
+    return (e.m.includes('core')&&!isPulseFin(e))||n.indexOf('carry')!==-1||n.indexOf("farmer's walk")!==-1;
+  }
   const wantCore=targets.includes('core');
   // Der Finisher ist ein eigener Block und zieht KEINE Übung vom Hauptteil ab,
   // damit die Übungszahl im Hauptteil gerade bleibt (wichtig für Supersätze).
@@ -869,13 +901,20 @@ function buildPlan(cfg){
     pool2=pool2.filter(e=>!used.has(e.n));
   }
   let finisher=null, finishers=[];
-  if(wantCore&&coreEx.length){
-    // 2-3 Finisher-Übungen (je nach Verfügbarkeit)
-    const want=coreEx.length>=3?3:coreEx.length;
+  // Finisher unabhängig vom Fokus: gesteuert über cfg.finisher (an/aus) + cfg.finisherType
+  if(cfg.finisher){
+    const ftype=cfg.finisherType||'core';
+    // Pool aus GESAMTER DB (nicht nur cands), damit Finisher immer verfügbar ist,
+    // aber nur mit vorhandenem Equipment ausführbar.
+    const eqOk=e=>exAllowed(e,eq);
+    let fpoolBase = db.filter(e=>eqOk(e)&&!e.outdoor&&(ftype==='pulse'?isPulseFin(e):isCoreFin(e)));
+    // Bereits im Hauptteil verwendete Übungen vermeiden
+    let fpool=fpoolBase.filter(e=>!used.has(e.n));
+    if(!fpool.length)fpool=fpoolBase.slice();
+    const want=fpool.length>=3?3:fpool.length;
     const usedFin=new Set();
-    let fpool=coreEx.slice();
     while(finishers.length<want&&fpool.length){
-      const f=pickOne(fpool);
+      const f=fpool[Math.floor(Math.random()*fpool.length)];
       if(!f)break;
       finishers.push(f); usedFin.add(f.n);
       fpool=fpool.filter(e=>!usedFin.has(e.n));
@@ -893,13 +932,21 @@ function buildPlan(cfg){
 }
 
 function warmupFor(targets){
+  // Kreislaufschonender Einstieg (kein Springen), rotierend für Abwechslung
+  const einstiege=[
+    'zügiges Gehen auf der Stelle',
+    'lockeres Arm- und Schulterkreisen',
+    'Hüftpendeln und sanftes Ausschütteln der Beine',
+    'ruhiges Einbewegen mit tiefer Atmung und Armkreisen'
+  ];
+  const einstieg=einstiege[Math.floor(Math.random()*einstiege.length)];
   let parts=[];
   if(targets.includes('shoulders')||targets.includes('chest'))parts.push('Schulterkreisen und Armkreisen');
   if(targets.includes('back'))parts.push('Rumpfrotationen und Katze-Kuh');
   if(targets.includes('legs'))parts.push('Hüftkreisen, Kniebeugen ohne Gewicht, Ausfallschritte');
   if(targets.includes('core'))parts.push('leichte Rumpfaktivierung');
   if(parts.length===0)parts.push('lockere Ganzkörper-Mobilisation');
-  return '90 Sek. lockeres Springen/Hampelmänner + 90 Sek. '+parts.join(', ')+' + 1 leichter Satz der ersten Übung.';
+  return '90 Sek. '+einstieg+' + 90 Sek. '+parts.join(', ')+' + 1 leichter Satz der ersten Übung.';
 }
 
 // Erkennt Übungen, die in Zeit statt Wiederholungen gemessen werden
@@ -1043,7 +1090,8 @@ function renderPlanHtml(plan,ctxId){
   const finList=(plan.finishers&&plan.finishers.length)?plan.finishers:(finisher?[finisher]:[]);
   if(finList.length){
     const finRows=finList.map(function(f,i){return renderExRow(f,i+1,ctx,true);}).join('');
-    finHtml=`<div class="block"><span class="block-label fin">Core-Finisher · ${finList.length} Übungen</span><div class="block-hint">2–3 Runden im Wechsel zum Abschluss. Bei Zeitmangel weglassen.</div>${finRows}</div>`;
+    const finLabel=(plan.cfg.finisherType==='pulse')?'Finisher · Kondition/Puls':'Finisher · Core/Stabilität';
+    finHtml=`<div class="block"><span class="block-label fin">${finLabel} · ${finList.length} Übungen</span><div class="block-hint">2–3 Runden im Wechsel zum Abschluss. Bei Zeitmangel weglassen.</div>${finRows}</div>`;
   }
   const eqSet=new Set(cfg.equip||[]);
   const isTravel=!eqSet.has('bb')&&!eqSet.has('dbH')&&!eqSet.has('abtr');
@@ -1053,7 +1101,7 @@ function renderPlanHtml(plan,ctxId){
   else if(outdoor.length&&cfg.outpos){body+=inHtml+outHtml;}
   else{body+=inHtml;}
   body+=finHtml;
-  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ca. ${estimateMinutes(plan)} · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Core-Finisher':''}${cfg.superset&&plan.blocks?' · '+plan.blocks.filter(b=>b.type==='superset').length+' Supersätze':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
+  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ca. ${estimateMinutes(plan)} · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Finisher':''}${cfg.superset&&plan.blocks?' · '+plan.blocks.filter(b=>b.type==='superset').length+' Supersätze':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
   <div class="actions"><button class="act primary" data-act="print">Als PDF / Drucken</button><button class="act" data-act="regen">Neue Variante ⟳</button></div>`;
 }
 
@@ -1197,7 +1245,7 @@ function genProgram(){
       if(['padel','bike1','bike2','walk20','walk45'].includes(cfg.type)){
         weekDays.push({day:d,type:'activity',act:cfg.type});return;
       }
-      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced,prefFav:S.program.prefFav,superset:S.program.superset,failure:S.program.failure});
+      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced,prefFav:S.program.prefFav,superset:S.program.superset,failure:S.program.failure,finisher:S.program.finisher,finisherType:S.program.finisherType});
       weekDays.push({day:d,type:'training',split:cfg.type,plan,deload:isDeload});
     });
     programData.push({week:w,deload:isDeload,days:weekDays});
@@ -1500,8 +1548,12 @@ if(document.getElementById('s-preffav'))document.getElementById('s-preffav').che
 if(document.getElementById('p-preffav'))document.getElementById('p-preffav').checked=!!S.program.prefFav;
 if(document.getElementById('s-superset'))document.getElementById('s-superset').checked=!!S.single.superset;
 if(document.getElementById('s-failure'))document.getElementById('s-failure').checked=!!S.single.failure;
+if(document.getElementById('s-finisher'))document.getElementById('s-finisher').checked=!!S.single.finisher;
+if(document.getElementById('s-finType')){document.querySelectorAll('#s-finType .opt').forEach(o=>o.classList.toggle('sel',o.dataset.fintype===(S.single.finisherType||'core')));document.getElementById('s-finType').style.opacity=S.single.finisher?'1':'0.4';}
 if(document.getElementById('p-superset'))document.getElementById('p-superset').checked=!!S.program.superset;
 if(document.getElementById('p-failure'))document.getElementById('p-failure').checked=!!S.program.failure;
+if(document.getElementById('p-finisher'))document.getElementById('p-finisher').checked=!!S.program.finisher;
+if(document.getElementById('p-finType')){document.querySelectorAll('#p-finType .opt').forEach(o=>o.classList.toggle('sel',o.dataset.fintype===(S.program.finisherType||'core')));document.getElementById('p-finType').style.opacity=S.program.finisher?'1':'0.4';}
 if(document.getElementById('s-advanced'))document.getElementById('s-advanced').checked=!!S.single.advanced;
 if(document.getElementById('p-advanced'))document.getElementById('p-advanced').checked=!!S.program.advanced;
 </script>
