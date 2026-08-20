@@ -1,0 +1,58 @@
+Copyright (c) 2026 Christoph Haindl
+Alle Rechte vorbehalten. / All rights reserved.
+
+===========================================================
+DEUTSCH
+===========================================================
+
+Dieses Werk ("Trainings-Studio"), einschließlich des gesamten
+Quellcodes, der Übungsdatenbank, der Texte und der Gestaltung,
+ist urheberrechtlich geschützt und Eigentum von Christoph Haindl.
+
+Es wird KEINE Lizenz zur Nutzung, Vervielfältigung, Veränderung,
+Weiterverbreitung oder kommerziellen Verwertung gewährt.
+
+Ohne ausdrückliche vorherige schriftliche Genehmigung des Urhebers
+ist es insbesondere untersagt:
+
+  - den Quellcode ganz oder in Teilen zu kopieren oder zu verwenden,
+  - das Werk zu verändern oder abgeleitete Werke zu erstellen,
+  - das Werk oder Teile davon weiterzuverbreiten oder zu veröffentlichen,
+  - die Übungsdatenbank oder deren Struktur zu übernehmen,
+  - das Werk kommerziell oder nicht-kommerziell zu verwerten.
+
+Das Betrachten der veröffentlichten Web-Anwendung im Browser stellt
+keine Übertragung von Nutzungsrechten am Quellcode dar.
+
+Zuwiderhandlungen werden urheberrechtlich verfolgt.
+
+Kontakt für Anfragen und Genehmigungen: Christoph Haindl
+https://www.linkedin.com/in/christoph-haindl-3b4847249
+
+===========================================================
+ENGLISH
+===========================================================
+
+This work ("Trainings-Studio"), including all source code, the
+exercise database, texts and design, is protected by copyright
+and owned by Christoph Haindl.
+
+NO license is granted to use, copy, modify, redistribute or
+commercially exploit this work.
+
+Without the express prior written permission of the author, the
+following are specifically prohibited:
+
+  - copying or using the source code in whole or in part,
+  - modifying the work or creating derivative works,
+  - redistributing or publishing the work or parts of it,
+  - reusing the exercise database or its structure,
+  - exploiting the work commercially or non-commercially.
+
+Viewing the published web application in a browser does not
+constitute a transfer of any usage rights to the source code.
+
+Infringements will be prosecuted under copyright law.
+
+Contact for requests and permissions: Christoph Haindl
+https://www.linkedin.com/in/christoph-haindl-3b4847249
