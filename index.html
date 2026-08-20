@@ -278,13 +278,13 @@ canvas{width:100%;height:auto;margin-top:10px;}
   </div>
 
   <div class="panel">
-    <h2>3 · Dauer &amp; Ziel</h2>
-    <div class="mini">Dauer</div>
+    <h2>3 · Umfang &amp; Ziel</h2>
+    <div class="mini">Anzahl Übungen (ohne Finisher)</div>
     <div class="opt-grid" id="s-durOpts">
-      <div class="opt" data-dur="20">20 Min</div>
-      <div class="opt sel" data-dur="30">30 Min</div>
-      <div class="opt" data-dur="45">45 Min</div>
-      <div class="opt" data-dur="60">60 Min</div>
+      <div class="opt" data-dur="4">4</div>
+      <div class="opt sel" data-dur="6">6</div>
+      <div class="opt" data-dur="8">8</div>
+      <div class="opt" data-dur="10">10</div>
     </div>
     <div class="mini" style="margin-top:13px;">Ziel</div>
     <div class="opt-grid" id="s-goalOpts">
@@ -359,17 +359,18 @@ canvas{width:100%;height:auto;margin-top:10px;}
     <h2>Wochentage belegen</h2>
     <p class="desc">Tippe auf einen Tag, um ihn einzustellen (Training, Aktivität oder Ruhe).</p>
     <div class="dayconfig" id="p-dayconfig"></div>
-    <div class="mini" style="margin-top:6px;">Standard-Ziel &amp; Dauer für Trainingstage:</div>
+    <div class="mini" style="margin-top:6px;">Standard-Ziel für Trainingstage:</div>
     <div class="opt-grid" id="p-goalOpts" style="margin-bottom:10px;">
       <div class="opt sel green" data-goal="maintain">Erhalt</div>
       <div class="opt" data-goal="build">Aufbau</div>
       <div class="opt" data-goal="strength">Kraft</div>
     </div>
+    <div class="mini">Anzahl Übungen je Trainingstag (ohne Finisher)</div>
     <div class="opt-grid" id="p-durOpts">
-      <div class="opt" data-dur="20">20</div>
-      <div class="opt sel" data-dur="30">30</div>
-      <div class="opt" data-dur="45">45</div>
-      <div class="opt" data-dur="60">60</div>
+      <div class="opt" data-dur="4">4</div>
+      <div class="opt sel" data-dur="6">6</div>
+      <div class="opt" data-dur="8">8</div>
+      <div class="opt" data-dur="10">10</div>
     </div>
   </div>
 
@@ -561,8 +562,8 @@ const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", 
 
 // =============== STATE ===============
 let S = {
-  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'30',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false,superset:false,failure:false},
-  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'30',days:{},advanced:false,prefFav:false,superset:false,failure:false},
+  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'6',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false,superset:false,failure:false},
+  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'6',days:{},advanced:false,prefFav:false,superset:false,failure:false},
   customEx:[],
   hiddenEx:[],
   favEx:[],
@@ -578,7 +579,8 @@ const GOALS = {
   build:{sets:"4",reps:"8–12",rest:"60–90 Sek.",label:"Aufbau",note:"Progressive Belastung: Gewicht steigern, wenn das obere Wiederholungsziel sauber erreicht wird."},
   strength:{sets:"5",reps:"4–6",rest:"2–3 Min.",label:"Kraft",note:"Schwere Gewichte, längere Pausen. Perfekte Technik, im Defizit nicht bis zum Muskelversagen."}
 };
-const DUR_COUNT = {"20":4,"30":6,"45":8,"60":10};
+// Der Wert von cfg.dur ist jetzt direkt die Anzahl der Übungen (4/6/8/10).
+const DUR_COUNT = {"4":4,"6":6,"8":8,"10":10};
 const SS_REST = "45–60 Sek.";
 const ACTIVITIES = {
   padel:{t:"Padel",sub:"ca. 1,5 h · zählt als Cardio + Beine",icon:"🎾"},
@@ -900,11 +902,31 @@ function warmupFor(targets){
   return '90 Sek. lockeres Springen/Hampelmänner + 90 Sek. '+parts.join(', ')+' + 1 leichter Satz der ersten Übung.';
 }
 
+// Erkennt Übungen, die in Zeit statt Wiederholungen gemessen werden
+function isHoldExercise(ex){
+  const n=ex.n.toLowerCase();
+  // Liegestütze enthalten "stütz", sind aber Wiederholungen -> ausschließen
+  if(n.indexOf('liegestütz')!==-1) return false;
+  return n.indexOf('plank')!==-1 || n.indexOf('hold')!==-1 || n.indexOf('wall sit')!==-1 ||
+         n.indexOf('unterarmstütz')!==-1 || n.indexOf('superman')!==-1;
+}
+// Erkennt Übungen, die in Zeit ODER Strecke gemessen werden (Tragen/Gehen/Kondition)
+function isTimeExercise(ex){
+  const n=ex.n.toLowerCase();
+  return n.indexOf('carry')!==-1 || n.indexOf('walk')!==-1 || n.indexOf('climber')!==-1 ||
+         n.indexOf('battle rope')!==-1 || n.indexOf('hampelmänner')!==-1 || n.indexOf('high knees')!==-1;
+}
 function renderExRow(ex,idx,ctx,star,noRest){
   const g=ctx.goal;
   let dose;
   if(ex.custom&&(ex.cSets||ex.cReps)){dose=(ex.cSets||g.sets)+' × '+(ex.cReps||g.reps);}
-  else if(ex.m.includes('core')&&ex.m.length===1){dose='3 × '+(ex.n.includes('Hold')||ex.n.includes('Plank')||ex.n.includes('Wall')?'30–45 Sek.':g.reps);}
+  else if(isHoldExercise(ex)){dose='3 × 30–45 Sek. halten';}
+  else if(isTimeExercise(ex)){dose='3 × 30–40 Sek.';}
+  else if(ex.m.includes('core')){
+    // Core-Isolation: sehr niedrige Wiederholungen (Kraft-Ziel) ergeben hier keinen Sinn
+    const lowRep = (g.reps==='4–6');
+    dose='3 × '+(lowRep?'12–15':g.reps);
+  }
   else{dose=g.sets+' × '+g.reps;}
   const numCell=star?'<div class="ex-n" style="background:var(--red);color:#fff">★</div>':`<div class="ex-n">${idx}</div>`;
   const listKey=ex.outdoor?'outdoor':'indoor';
@@ -937,6 +959,46 @@ function genSingle(){
   LAST_SINGLE=plan;
   document.getElementById('s-output').innerHTML=renderPlanHtml(plan,'single');
   document.getElementById('s-output').scrollIntoView({behavior:'smooth'});
+}
+
+// Grobe Zeitschätzung: ca. 40 Sek. pro Satz (Ausführung + Aufbau) + tatsächliche Pausen + Warm-up.
+// Bewusst als Spanne, weil Tempo und Übungsart stark variieren.
+function estimateMinutes(plan){
+  const cfg=plan.cfg, g=plan.goal;
+  const SET_SEC=40, WARMUP_SEC=240;
+  // Pausenzeit in Sekunden aus dem Ziel ableiten (Mittelwert der Spanne)
+  function restSeconds(txt){
+    if(!txt) return 60;
+    if(txt.indexOf('Min')!==-1){
+      const m=txt.match(/(\d+)\s*[–-]\s*(\d+)/);
+      if(m) return ((+m[1])+(+m[2]))/2*60;
+      const s=txt.match(/(\d+)/); return s?(+s[1])*60:120;
+    }
+    const m=txt.match(/(\d+)\s*[–-]\s*(\d+)/);
+    if(m) return ((+m[1])+(+m[2]))/2;
+    const s=txt.match(/(\d+)/); return s?+s[1]:60;
+  }
+  const setsPerEx=parseInt(g.sets)||3;
+  const normalRest=restSeconds(g.rest);
+  const ssRest=52; // 45-60 Sek. Mittelwert
+  let seconds=WARMUP_SEC;
+  if(cfg.superset&&plan.blocks&&plan.blocks.length){
+    const pairs=plan.blocks.filter(b=>b.type==='superset').length;
+    const singles=plan.blocks.filter(b=>b.type==='single').length;
+    // Paar: 2 Übungen direkt hintereinander, danach eine Pause
+    seconds += pairs*setsPerEx*(2*SET_SEC+ssRest);
+    seconds += singles*setsPerEx*(SET_SEC+normalRest);
+  }else{
+    const n=plan.indoor.length+plan.outdoor.length;
+    seconds += n*setsPerEx*(SET_SEC+normalRest);
+  }
+  // Finisher (2-3 Übungen, 3 Runden, kurze Pausen)
+  const finN=(plan.finishers&&plan.finishers.length)?plan.finishers.length:(plan.finisher?1:0);
+  if(finN) seconds += finN*3*(35+30);
+  const mins=Math.round(seconds/60);
+  const low=Math.max(5,Math.round(mins*0.85/5)*5);
+  const high=Math.round(mins*1.15/5)*5;
+  return low+'–'+high+' Min';
 }
 
 function renderPlanHtml(plan,ctxId){
@@ -991,7 +1053,7 @@ function renderPlanHtml(plan,ctxId){
   else if(outdoor.length&&cfg.outpos){body+=inHtml+outHtml;}
   else{body+=inHtml;}
   body+=finHtml;
-  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ${cfg.dur} Min · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Core-Finisher':''}${cfg.superset&&plan.blocks?' · '+plan.blocks.filter(b=>b.type==='superset').length+' Supersätze':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
+  return `<div class="result"><div class="result-head"><div class="rtag">${locTag} · ca. ${estimateMinutes(plan)} · ${goal.label}</div><h3>${focusLabel}</h3><div class="rmeta">${indoor.length+outdoor.length} Übungen${finisher?' + Core-Finisher':''}${cfg.superset&&plan.blocks?' · '+plan.blocks.filter(b=>b.type==='superset').length+' Supersätze':''} · ${goal.sets} Sätze · ${goal.reps} Wdh.</div></div>${pulse}${body}</div>
   <div class="actions"><button class="act primary" data-act="print">Als PDF / Drucken</button><button class="act" data-act="regen">Neue Variante ⟳</button></div>`;
 }
 
@@ -1400,6 +1462,10 @@ function saveLocal(){
 function autoSave(){try{localStorage.setItem('trainingStudio',JSON.stringify(S));}catch(e){}}
 function loadLocal(){
   try{const d=localStorage.getItem('trainingStudio');if(d){S=Object.assign(S,JSON.parse(d));}}catch(e){}
+  // Migration: früher war 'dur' eine Minutenangabe (20/30/45/60), jetzt ist es die Übungszahl
+  const DUR_MIGRATE={'20':'4','30':'6','45':'8','60':'10'};
+  if(S.single&&DUR_MIGRATE[S.single.dur])S.single.dur=DUR_MIGRATE[S.single.dur];
+  if(S.program&&DUR_MIGRATE[S.program.dur])S.program.dur=DUR_MIGRATE[S.program.dur];
   if(!Array.isArray(S.favEx))S.favEx=[];
   if(!S.exComments||typeof S.exComments!=='object')S.exComments={};
   if(!S.single.hasOwnProperty('prefFav'))S.single.prefFav=false;
