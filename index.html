@@ -293,7 +293,7 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <div class="opt" data-goal="strength">Kraft</div>
     </div>
     <div class="toggle-row" style="margin-top:15px;">
-      <label class="switch"><input type="checkbox" id="s-pulse" checked><span class="slider"></span></label>
+      <label class="switch"><input type="checkbox" id="s-pulse"><span class="slider"></span></label>
       <span>Kreislauf-Regeln anzeigen</span>
     </div>
     <div class="toggle-row">
@@ -308,10 +308,12 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <label class="switch"><input type="checkbox" id="s-superset"><span class="slider"></span></label>
       <span>Supersätze (Antagonisten) · zwei Übungen ohne Pause</span>
     </div>
+    <!-- Muskelversagen-Option vorerst deaktiviert (kreislaufschonend). Bei Bedarf wieder einkommentieren.
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="s-failure"><span class="slider"></span></label>
       <span>Letzter Satz bis Muskelversagen <span style="color:var(--red);">⚠️</span></span>
     </div>
+    -->
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="s-finisher" checked><span class="slider"></span></label>
       <span>Finisher hinzufügen (2–3 Übungen zum Abschluss)</span>
@@ -348,13 +350,19 @@ canvas{width:100%;height:auto;margin-top:10px;}
       <span>Favoriten (★) bevorzugen</span>
     </div>
     <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="p-pulse"><span class="slider"></span></label>
+      <span>Kreislauf-Regeln anzeigen</span>
+    </div>
+    <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="p-superset"><span class="slider"></span></label>
       <span>Supersätze (Antagonisten) · zwei Übungen ohne Pause</span>
     </div>
+    <!-- Muskelversagen-Option vorerst deaktiviert (kreislaufschonend). Bei Bedarf wieder einkommentieren.
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="p-failure"><span class="slider"></span></label>
       <span>Letzter Satz bis Muskelversagen <span style="color:var(--red);">⚠️</span></span>
     </div>
+    -->
     <div class="toggle-row">
       <label class="switch"><input type="checkbox" id="p-finisher" checked><span class="slider"></span></label>
       <span>Finisher hinzufügen (2–3 Übungen zum Abschluss)</span>
@@ -578,8 +586,8 @@ const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", 
 
 // =============== STATE ===============
 let S = {
-  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'6',goal:'maintain',outpos:false,pulse:true,advanced:false,prefFav:false,superset:false,failure:false,finisher:true,finisherType:'core'},
-  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'6',days:{},advanced:false,prefFav:false,superset:false,failure:false,finisher:true,finisherType:'core'},
+  single:{equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],split:'push',muscles:[],dur:'6',goal:'maintain',outpos:false,pulse:false,advanced:false,prefFav:false,superset:true,failure:false,finisher:true,finisherType:'core'},
+  program:{weeks:6,deload:true,equip:['bb','dbH','dbL','bench','pullup','rope','abtr','band'],goal:'maintain',dur:'6',days:{},pulse:false,advanced:false,prefFav:false,superset:true,failure:false,finisher:true,finisherType:'core'},
   customEx:[],
   hiddenEx:[],
   favEx:[],
@@ -705,10 +713,11 @@ var advonly=document.getElementById('al-advonly');
 if(advonly)advonly.addEventListener('change',function(e){alleFilter.advonly=e.target.checked;renderAlle();});
 
 document.getElementById('s-pulse').addEventListener('change',e=>S.single.pulse=e.target.checked);
+var _pp=document.getElementById('p-pulse');if(_pp)_pp.addEventListener('change',e=>S.program.pulse=e.target.checked);
 document.getElementById('s-advanced').addEventListener('change',e=>S.single.advanced=e.target.checked);
 document.getElementById('s-preffav').addEventListener('change',e=>S.single.prefFav=e.target.checked);
 document.getElementById('s-superset').addEventListener('change',e=>S.single.superset=e.target.checked);
-document.getElementById('s-failure').addEventListener('change',e=>S.single.failure=e.target.checked);
+/* Muskelversagen deaktiviert: document.getElementById('s-failure').addEventListener('change',e=>S.single.failure=e.target.checked); */
 document.getElementById('s-finisher').addEventListener('change',function(e){S.single.finisher=e.target.checked;var t=document.getElementById('s-finType');if(t)t.style.opacity=e.target.checked?'1':'0.4';});
 document.querySelectorAll('#s-finType .opt').forEach(el=>el.addEventListener('click',function(){document.querySelectorAll('#s-finType .opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.single.finisherType=el.dataset.fintype;}));
 
@@ -724,7 +733,7 @@ document.getElementById('p-deload').addEventListener('change',e=>S.program.deloa
 document.getElementById('p-advanced').addEventListener('change',e=>S.program.advanced=e.target.checked);
 document.getElementById('p-preffav').addEventListener('change',e=>S.program.prefFav=e.target.checked);
 document.getElementById('p-superset').addEventListener('change',e=>S.program.superset=e.target.checked);
-document.getElementById('p-failure').addEventListener('change',e=>S.program.failure=e.target.checked);
+/* Muskelversagen deaktiviert: document.getElementById('p-failure').addEventListener('change',e=>S.program.failure=e.target.checked); */
 document.getElementById('p-finisher').addEventListener('change',function(e){S.program.finisher=e.target.checked;var t=document.getElementById('p-finType');if(t)t.style.opacity=e.target.checked?'1':'0.4';});
 document.querySelectorAll('#p-finType .opt').forEach(el=>el.addEventListener('click',function(){document.querySelectorAll('#p-finType .opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.program.finisherType=el.dataset.fintype;}));
 
@@ -1245,7 +1254,7 @@ function genProgram(){
       if(['padel','bike1','bike2','walk20','walk45'].includes(cfg.type)){
         weekDays.push({day:d,type:'activity',act:cfg.type});return;
       }
-      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:true,advanced:S.program.advanced,prefFav:S.program.prefFav,superset:S.program.superset,failure:S.program.failure,finisher:S.program.finisher,finisherType:S.program.finisherType});
+      const plan=buildPlan({equip:S.program.equip,split:cfg.type,muscles:[],dur:S.program.dur,goal:isDeload?'maintain':S.program.goal,outpos:false,pulse:S.program.pulse,advanced:S.program.advanced,prefFav:S.program.prefFav,superset:S.program.superset,failure:S.program.failure,finisher:S.program.finisher,finisherType:S.program.finisherType});
       weekDays.push({day:d,type:'training',split:cfg.type,plan,deload:isDeload});
     });
     programData.push({week:w,deload:isDeload,days:weekDays});
@@ -1510,6 +1519,9 @@ function saveLocal(){
 function autoSave(){try{localStorage.setItem('trainingStudio',JSON.stringify(S));}catch(e){}}
 function loadLocal(){
   try{const d=localStorage.getItem('trainingStudio');if(d){S=Object.assign(S,JSON.parse(d));}}catch(e){}
+  // Muskelversagen-Option deaktiviert: aus evtl. alten Speicherständen hart abschalten
+  if(S.single)S.single.failure=false;
+  if(S.program)S.program.failure=false;
   // Migration: früher war 'dur' eine Minutenangabe (20/30/45/60), jetzt ist es die Übungszahl
   const DUR_MIGRATE={'20':'4','30':'6','45':'8','60':'10'};
   if(S.single&&DUR_MIGRATE[S.single.dur])S.single.dur=DUR_MIGRATE[S.single.dur];
@@ -1546,12 +1558,14 @@ document.getElementById('p-weeks').value=S.program.weeks;
 document.getElementById('p-deload').checked=S.program.deload;
 if(document.getElementById('s-preffav'))document.getElementById('s-preffav').checked=!!S.single.prefFav;
 if(document.getElementById('p-preffav'))document.getElementById('p-preffav').checked=!!S.program.prefFav;
+if(document.getElementById('s-pulse'))document.getElementById('s-pulse').checked=!!S.single.pulse;
+if(document.getElementById('p-pulse'))document.getElementById('p-pulse').checked=!!S.program.pulse;
 if(document.getElementById('s-superset'))document.getElementById('s-superset').checked=!!S.single.superset;
-if(document.getElementById('s-failure'))document.getElementById('s-failure').checked=!!S.single.failure;
+/* deaktiviert */ if(document.getElementById('s-failure'))document.getElementById('s-failure').checked=!!S.single.failure;
 if(document.getElementById('s-finisher'))document.getElementById('s-finisher').checked=!!S.single.finisher;
 if(document.getElementById('s-finType')){document.querySelectorAll('#s-finType .opt').forEach(o=>o.classList.toggle('sel',o.dataset.fintype===(S.single.finisherType||'core')));document.getElementById('s-finType').style.opacity=S.single.finisher?'1':'0.4';}
 if(document.getElementById('p-superset'))document.getElementById('p-superset').checked=!!S.program.superset;
-if(document.getElementById('p-failure'))document.getElementById('p-failure').checked=!!S.program.failure;
+/* deaktiviert */ if(document.getElementById('p-failure'))document.getElementById('p-failure').checked=!!S.program.failure;
 if(document.getElementById('p-finisher'))document.getElementById('p-finisher').checked=!!S.program.finisher;
 if(document.getElementById('p-finType')){document.querySelectorAll('#p-finType .opt').forEach(o=>o.classList.toggle('sel',o.dataset.fintype===(S.program.finisherType||'core')));document.getElementById('p-finType').style.opacity=S.program.finisher?'1':'0.4';}
 if(document.getElementById('s-advanced'))document.getElementById('s-advanced').checked=!!S.single.advanced;
