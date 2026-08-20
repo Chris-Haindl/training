@@ -116,6 +116,18 @@ label.fld{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.
 .block-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:#fff;background:var(--blue);display:inline-block;padding:4px 12px;border-radius:6px;margin-bottom:4px;}
 .block-label.warm{background:var(--green);}
 .block-label.ss{background:var(--blue);color:#fff;}
+.al-loghist{margin-top:8px;padding:8px 10px;background:#F4F8FB;border-radius:8px;}
+.al-loghead{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--deep);margin-bottom:5px;}
+.log-row{display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0;border-bottom:1px solid rgba(0,43,73,.07);}
+.log-row:last-child{border-bottom:none;}
+.log-date{color:#8a97a3;}
+.log-val{font-weight:700;color:var(--deep);}
+.log-more{font-size:11px;color:#8a97a3;margin-top:4px;}
+.ex-log{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(0,43,73,.15);}
+.log-last{font-size:10.5px;color:var(--blue);margin-bottom:4px;font-weight:600;}
+.log-fields{display:flex;gap:6px;align-items:center;}
+.log-in{flex:1;min-width:0;padding:8px 10px;border:1.5px solid #dfe6ec;border-radius:8px;font-size:15px;font-family:inherit;background:#fff;color:var(--deep);}
+.log-in:focus{outline:none;border-color:var(--blue);}
 .ss-block{border:1.5px solid var(--blue);border-radius:11px;padding:10px 12px;margin:10px 0;background:var(--blue-l);}
 .ss-head{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--deep);margin-bottom:4px;}
 .ss-block .ex{border-bottom:1px dashed rgba(0,43,73,.18);}
@@ -497,7 +509,7 @@ canvas{width:100%;height:auto;margin-top:10px;}
 <div class="view" id="view-data">
   <div class="panel">
     <h2>Speichern &amp; Exportieren</h2>
-    <div class="info sun"><h4>Daten sichern</h4>Lokal gespeicherte Browserdaten können gelegentlich durch System-Updates gelöscht werden. Nutze regelmäßig <strong>„Exportieren"</strong>, um ein Backup als Datei zu sichern.</div>
+    <div class="info sun"><h4>Daten sichern</h4>Lokal gespeicherte Browserdaten (auch deine <strong>Trainingshistorie</strong>) können durch System-Updates gelöscht werden. Nutze regelmäßig <strong>„Exportieren"</strong> und sichere die Datei in Dateien/iCloud. Beim Wechsel auf ein neues Gerät lädst du sie über <strong>„Importieren"</strong> wieder ein.</div>
     <div class="actions" style="margin-top:0;">
       <button type="button" class="act primary" data-act="savelocal">Im Browser speichern</button>
       <button type="button" class="act" data-act="export">Exportieren (Datei)</button>
@@ -580,6 +592,11 @@ document.addEventListener('click',function(ev){
   var el=ev.target.closest('[data-act]');
   if(el){ev.preventDefault();handleAction(el);}
 });
+// Trainingslog: Eingabe speichern (input-Event über Delegation)
+document.addEventListener('input',function(ev){
+  var el=ev.target.closest('.log-in');
+  if(el){ handleLogInput(el); }
+});
 
 // =============== EXERCISE DB ===============
 const BASE_DB = [{"n": "Kurzhantel-Bankdrücken", "m": ["chest"], "g": ["push", "full"], "equip": ["dbEITHER", "bench"], "cue": "Schulterblätter zusammen, Ellbogen 45°, kontrolliert runter, explosiv hoch.", "outdoor": false, "adv": false}, {"n": "Langhantel-Bankdrücken", "m": ["chest"], "g": ["push", "full"], "equip": ["bb", "bench"], "cue": "Stange zur unteren Brust, Handgelenke gerade, Füße fest am Boden.", "outdoor": false, "adv": false}, {"n": "KH-Schrägbankdrücken", "m": ["chest", "shoulders"], "g": ["push", "full"], "equip": ["dbEITHER", "bench"], "cue": "Bank leicht erhöht oder Schultern erhöht. Trifft die obere Brust.", "outdoor": false, "adv": false}, {"n": "KH-Negativ-Bankdrücken", "m": ["chest"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Kopf leicht tiefer als Hüfte. Betont die untere Brust.", "outdoor": false, "adv": false}, {"n": "KH-Fliegende", "m": ["chest"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Leicht gebeugte Arme, weiter Bogen, Dehnung in der Brust spüren.", "outdoor": false, "adv": false}, {"n": "KH-Schräg-Fliegende", "m": ["chest", "shoulders"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Auf Schrägbank, weiter Bogen. Obere Brust und Dehnung.", "outdoor": false, "adv": false}, {"n": "Liegestütze", "m": ["chest", "arms"], "g": ["push", "full"], "equip": [], "cue": "Körper gerade, Bauch fest, Ellbogen 45° zum Körper.", "outdoor": false, "adv": false}, {"n": "Liegestütze (Füße erhöht)", "m": ["chest", "shoulders"], "g": ["push", "full"], "equip": ["bench"], "cue": "Füße auf Bank/Stuhl, Brust tief. Betont obere Brust und Schulter.", "outdoor": false, "adv": false}, {"n": "Liegestütze (eng/Diamant)", "m": ["chest", "arms"], "g": ["push", "full"], "equip": [], "cue": "Hände eng unter der Brust. Mehr Trizeps und innere Brust.", "outdoor": false, "adv": false}, {"n": "Liegestütze (breit)", "m": ["chest"], "g": ["push", "full"], "equip": [], "cue": "Hände weiter als schulterbreit. Mehr äußere Brust.", "outdoor": false, "adv": false}, {"n": "Archer-Liegestütze", "m": ["chest", "arms"], "g": ["push"], "equip": [], "cue": "Gewicht auf eine Seite verlagern, ein Arm streckt. Fortgeschritten.", "outdoor": false, "adv": true}, {"n": "KH-Überzüge (Pullover)", "m": ["chest", "back"], "g": ["push", "pull"], "equip": ["dbH", "bench"], "cue": "Liegend, Hantel weit über den Kopf, Brustkorb-Dehnung. Langsam.", "outdoor": false, "adv": false}, {"n": "Band-Brustpresse", "m": ["chest"], "g": ["push", "full"], "equip": ["band"], "cue": "Band hinter dem Rücken, nach vorne pressen. Spannung halten.", "outdoor": false, "adv": false}, {"n": "Deficit-Liegestütze", "m": ["chest"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Hände auf zwei Hanteln, tiefer absenken. Größere Bewegungsamplitude.", "outdoor": false, "adv": true}, {"n": "Klimmzüge (Obergriff)", "m": ["back"], "g": ["pull", "full"], "equip": ["pullup"], "cue": "Breiter Obergriff, Brust zur Stange, unten voll ausstrecken.", "outdoor": true, "adv": true}, {"n": "Klimmzüge (Untergriff)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["pullup"], "cue": "Untergriff = mehr Lat und Bizeps. Schulterblätter unten einziehen.", "outdoor": true, "adv": true}, {"n": "Klimmzüge (neutral/eng)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["pullup"], "cue": "Neutraler Griff, gelenkschonend. Voller Bewegungsradius.", "outdoor": true, "adv": true}, {"n": "Negativ-Klimmzüge", "m": ["back"], "g": ["pull"], "equip": ["pullup"], "cue": "Oben starten, langsam 3-5 Sek. runter. Für Kraftaufbau am Klimmzug.", "outdoor": true, "adv": true}, {"n": "KH-Rudern vorgebeugt (beidarmig)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["dbH"], "cue": "Rücken gerade, 45° vor, Hanteln zum Bauchnabel, Schulterblätter zusammen.", "outdoor": false, "adv": false}, {"n": "Einarmiges KH-Rudern", "m": ["back"], "g": ["pull"], "equip": ["dbH", "bench"], "cue": "Auf Bank/Stuhl abstützen, Ellbogen eng zur Hüfte ziehen.", "outdoor": false, "adv": false}, {"n": "Langhantel-Rudern", "m": ["back"], "g": ["pull", "full"], "equip": ["bb"], "cue": "Hüfthinge, Stange zum unteren Bauch, Rücken neutral.", "outdoor": false, "adv": false}, {"n": "Langhantel-Rudern (Untergriff)", "m": ["back", "arms"], "g": ["pull"], "equip": ["bb"], "cue": "Untergriff betont unteren Lat und Bizeps stärker.", "outdoor": false, "adv": false}, {"n": "KH-Rudern (weiter Ellbogen)", "m": ["back"], "g": ["pull"], "equip": ["dbH"], "cue": "Ellbogen weit außen = mehr oberer Rücken und hintere Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Straight-Arm-Pulldown", "m": ["back"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Vorgebeugt, gestreckte Arme nach hinten führen. Isoliert den Lat.", "outdoor": false, "adv": false}, {"n": "Band-Rudern", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["band"], "cue": "Band fixieren, Ellbogen eng nach hinten, Schulterblätter zusammen.", "outdoor": false, "adv": false}, {"n": "Band-Lat-Pulldown", "m": ["back"], "g": ["pull", "full"], "equip": ["band"], "cue": "Band hoch fixieren, gestreckt nach unten ziehen. Lat-Fokus.", "outdoor": false, "adv": false}, {"n": "Superman-Hold", "m": ["back"], "g": ["pull", "legs"], "equip": [], "cue": "Bauchlage, Arme/Beine heben, unteren Rücken aktivieren, halten.", "outdoor": false, "adv": false}, {"n": "Superman-Rudern (W-Zug)", "m": ["back"], "g": ["pull"], "equip": [], "cue": "Bauchlage, Arme wie beim Rudern nach hinten ziehen, oben halten.", "outdoor": false, "adv": false}, {"n": "Reverse Snow Angel", "m": ["back", "shoulders"], "g": ["pull"], "equip": [], "cue": "Bauchlage, Arme flach am Boden kreisen. Oberer Rücken, Haltung.", "outdoor": false, "adv": false}, {"n": "Umgekehrtes Rudern (unter Tisch/Stange)", "m": ["back", "arms"], "g": ["pull", "full"], "equip": ["bench"], "cue": "Unter stabilem Tisch/Stange, Körper gerade, Brust zur Kante ziehen.", "outdoor": false, "adv": false}, {"n": "KH-Schulterdrücken (stehend)", "m": ["shoulders", "arms"], "g": ["push", "full"], "equip": ["dbEITHER"], "cue": "Kein Hohlkreuz, über den Kopf drücken, Bauch fest. Nie Luft anhalten.", "outdoor": false, "adv": false}, {"n": "KH-Schulterdrücken (sitzend)", "m": ["shoulders", "arms"], "g": ["push"], "equip": ["dbEITHER", "bench"], "cue": "Auf Bank mit Rückenlehne, saubere Bahn über den Kopf.", "outdoor": false, "adv": false}, {"n": "Langhantel-Schulterdrücken", "m": ["shoulders"], "g": ["push"], "equip": ["bb"], "cue": "Stange von der Brust über den Kopf, Rumpf stabil, kein Zurücklehnen.", "outdoor": false, "adv": false}, {"n": "Arnold-Press", "m": ["shoulders"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Aus gedrehter Position hochdrücken und drehen. Ganze Schulter.", "outdoor": false, "adv": false, "gif": "https://modusx.de/wp-content/uploads/arnold-press-kurzhanteln.gif"}, {"n": "KH-Seitheben", "m": ["shoulders"], "g": ["push", "full"], "equip": ["dbEITHER"], "cue": "Arme leicht gebeugt bis Schulterhöhe, langsam senken. Seitliche Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Seitheben (vorgebeugt)", "m": ["shoulders", "back"], "g": ["pull", "push"], "equip": ["dbEITHER"], "cue": "45° vor, Arme seitlich. Hintere Schulter für die runde Optik.", "outdoor": false, "adv": false}, {"n": "KH-Frontheben", "m": ["shoulders"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Gestreckte Arme nach vorne bis Schulterhöhe. Vordere Schulter.", "outdoor": false, "adv": false}, {"n": "KH-Aufrechtes Rudern", "m": ["shoulders", "back"], "g": ["pull", "push"], "equip": ["dbEITHER"], "cue": "Hanteln eng am Körper zum Kinn ziehen, Ellbogen führen.", "outdoor": false, "adv": false}, {"n": "Pike Push-up", "m": ["shoulders", "chest"], "g": ["push", "full"], "equip": [], "cue": "Hüfte hoch (umgekehrtes V), Kopf Richtung Boden. Schulterlast.", "outdoor": false, "adv": false}, {"n": "Handstand-Push-up (an Wand)", "m": ["shoulders"], "g": ["push"], "equip": [], "cue": "An der Wand, kontrolliert absenken. Nur für Fortgeschrittene.", "outdoor": false, "adv": true}, {"n": "Band-Seitheben", "m": ["shoulders"], "g": ["push", "full"], "equip": ["band"], "cue": "Auf Band stehen, seitlich bis Schulterhöhe, langsam zurück.", "outdoor": false, "adv": false}, {"n": "Band-Face-Pull", "m": ["shoulders", "back"], "g": ["pull", "full"], "equip": ["band"], "cue": "Band auf Kopfhöhe, zum Gesicht ziehen, Ellbogen hoch. Hintere Schulter.", "outdoor": false, "adv": false, "gif": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJi16IuN3VSy4vMGNWeiJTEiCDoVNAykqI5r-GnyyiBg&s=10"}, {"n": "Langhantel-Frontheben", "m": ["shoulders"], "g": ["push"], "equip": ["bb"], "cue": "Stange gestreckt bis Schulterhöhe heben. Kein Schwung.", "outdoor": false, "adv": false}, {"n": "KH-Bizeps-Curls (Supination)", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Ellbogen fixiert, oben Handfläche drehen, kein Schwung.", "outdoor": false, "adv": false}, {"n": "KH-Hammer-Curls", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Neutraler Griff, Unterarm und Bizeps. Kontrolliert.", "outdoor": false, "adv": false}, {"n": "KH-Konzentrations-Curls", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER", "bench"], "cue": "Sitzend, Ellbogen am Oberschenkel, isolierter Bizeps.", "outdoor": false, "adv": false}, {"n": "Langhantel-Curls", "m": ["arms"], "g": ["pull"], "equip": ["bb"], "cue": "Schulterbreiter Untergriff, Ellbogen am Körper, kein Schwung.", "outdoor": false, "adv": false}, {"n": "KH-Curls (schräg liegend)", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER", "bench"], "cue": "Auf Schrägbank, Arme hängen. Maximale Bizeps-Dehnung.", "outdoor": false, "adv": false}, {"n": "Trizeps-Dips (Stuhl/Bank)", "m": ["arms"], "g": ["push", "full"], "equip": ["bench"], "cue": "Hände auf Kante, Ellbogen nach hinten, tief absenken.", "outdoor": false, "adv": false}, {"n": "KH-Trizeps-Kickbacks", "m": ["arms"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Oberarm waagrecht fixieren, voll strecken, kurz halten.", "outdoor": false, "adv": false}, {"n": "KH-Überkopf-Trizeps", "m": ["arms"], "g": ["push"], "equip": ["dbEITHER"], "cue": "Eine Hantel beidhändig hinter den Kopf, strecken. Langer Kopf.", "outdoor": false, "adv": false}, {"n": "Langhantel-Stirndrücken", "m": ["arms"], "g": ["push"], "equip": ["bb", "bench"], "cue": "Liegend, Stange zur Stirn absenken, strecken. Trizeps-Isolation.", "outdoor": false, "adv": false}, {"n": "Enge Liegestütze", "m": ["arms", "chest"], "g": ["push", "full"], "equip": [], "cue": "Hände eng, Ellbogen am Körper. Trizeps-lastiger Push.", "outdoor": false, "adv": false}, {"n": "Band-Curls", "m": ["arms"], "g": ["pull", "full"], "equip": ["band"], "cue": "Auf Band stehen, curlen, Spannung oben halten.", "outdoor": false, "adv": false}, {"n": "Band-Trizeps-Drücken", "m": ["arms"], "g": ["push", "full"], "equip": ["band"], "cue": "Band hoch fixieren, nach unten strecken. Trizeps.", "outdoor": false, "adv": false}, {"n": "KH-Zottman-Curls", "m": ["arms"], "g": ["pull"], "equip": ["dbEITHER"], "cue": "Hoch supiniert, gedreht pronierend senken. Bizeps + Unterarm.", "outdoor": false, "adv": false}, {"n": "Goblet Squats", "m": ["legs", "core"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Hantel vor der Brust, tief in die Hocke, Fersen am Boden.", "outdoor": false, "adv": false}, {"n": "Langhantel-Kniebeugen", "m": ["legs", "core"], "g": ["legs", "full"], "equip": ["bb"], "cue": "Stange auf oberem Rücken, Hüfte nach hinten, tief, kontrolliert.", "outdoor": false, "adv": false}, {"n": "Langhantel-Frontkniebeugen", "m": ["legs", "core"], "g": ["legs"], "equip": ["bb"], "cue": "Stange auf der vorderen Schulter, aufrechter Oberkörper. Quadrizeps.", "outdoor": false, "adv": false}, {"n": "KH-Ausfallschritte (rückwärts)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Schritt zurück, hinteres Knie fast zum Boden, knieschonend.", "outdoor": false, "adv": false}, {"n": "KH-Ausfallschritte (vorwärts)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Schritt nach vorne, tief, über die Ferse zurückdrücken.", "outdoor": false, "adv": false}, {"n": "KH-Ausfallschritte (gehend)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Gehend durch den Raum, abwechselnd. Beine und Balance.", "outdoor": false, "adv": false}, {"n": "Bulgarian Split Squat", "m": ["legs"], "g": ["legs"], "equip": ["dbEITHER", "bench"], "cue": "Hinterer Fuß erhöht, tief absenken. Ein Bein, hohe Intensität.", "outdoor": false, "adv": true}, {"n": "Rumänisches KH-Kreuzheben", "m": ["legs", "back"], "g": ["legs", "pull", "full"], "equip": ["dbH"], "cue": "Hüfthinge, Rücken gerade, Hanteln eng am Bein. Hintere Kette.", "outdoor": false, "adv": false}, {"n": "Langhantel-Kreuzheben", "m": ["legs", "back"], "g": ["legs", "pull"], "equip": ["bb"], "cue": "Stange eng am Schienbein, Rücken neutral, aus der Hüfte strecken.", "outdoor": false, "adv": false}, {"n": "Rumänisches Langhantel-Kreuzheben", "m": ["legs", "back"], "g": ["legs", "pull"], "equip": ["bb"], "cue": "Betonte Dehnung der hinteren Oberschenkel, Knie leicht gebeugt.", "outdoor": false, "adv": false}, {"n": "KH-Sumo-Squat", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbH"], "cue": "Breiter Stand, Zehen nach außen, eine Hantel senkrecht halten. Innenschenkel.", "outdoor": false, "adv": false}, {"n": "Glute Bridges", "m": ["legs", "core"], "g": ["legs", "full"], "equip": [], "cue": "Rückenlage, Hüfte hoch, oben Gesäß anspannen.", "outdoor": false, "adv": false, "gif": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHmbVEslGN601XJ1nj5venbWGGQTCPmlbCt91jYZOjVw&s=10"}, {"n": "Glute Bridges (einbeinig)", "m": ["legs", "core"], "g": ["legs"], "equip": [], "cue": "Ein Bein gestreckt, Hüfte hoch. Mehr Intensität pro Seite.", "outdoor": false, "adv": false}, {"n": "Hip Thrust (mit KH)", "m": ["legs"], "g": ["legs"], "equip": ["dbH", "bench"], "cue": "Schultern auf Bank, Hantel auf der Hüfte, hoch drücken. Gesäß.", "outdoor": false, "adv": false}, {"n": "Wadenheben (mit KH)", "m": ["legs"], "g": ["legs"], "equip": ["dbEITHER"], "cue": "Auf Fußballen hoch, oben halten, langsam senken.", "outdoor": false, "adv": false}, {"n": "Wadenheben (einbeinig)", "m": ["legs"], "g": ["legs"], "equip": ["dbEITHER"], "cue": "Ein Bein, volle Amplitude. Mehr Reiz pro Wade.", "outdoor": false, "adv": false}, {"n": "Air Squats", "m": ["legs"], "g": ["legs", "full"], "equip": [], "cue": "Körpergewicht, tief und kontrolliert. Für hohe Wiederholungen.", "outdoor": false, "adv": false}, {"n": "Sprungkniebeugen", "m": ["legs", "core"], "g": ["legs", "full"], "equip": [], "cue": "Explosiv hochspringen, weich landen. Nur wenn Kreislauf stabil.", "outdoor": false, "adv": true}, {"n": "Wall Sit", "m": ["legs"], "g": ["legs"], "equip": [], "cue": "An der Wand, Oberschenkel waagrecht, halten. Statische Ausdauer.", "outdoor": false, "adv": false}, {"n": "Step-ups (auf Bank/Stuhl)", "m": ["legs"], "g": ["legs", "full"], "equip": ["dbEITHER", "bench"], "cue": "Auf erhöhte Fläche steigen, über die Ferse hochdrücken.", "outdoor": false, "adv": false}, {"n": "KH-Kreuzheben einbeinig", "m": ["legs", "back", "core"], "g": ["legs", "pull"], "equip": ["dbH"], "cue": "Auf einem Bein, Hüfthinge, Balance. Hintere Kette und Rumpf.", "outdoor": false, "adv": false}, {"n": "Unterarmstütz (Plank)", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": [], "cue": "Gerade Linie, Bauch/Gesäß fest, ruhig weiteratmen.", "outdoor": false, "adv": false}, {"n": "Seitlicher Unterarmstütz", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Seitlage auf Unterarm, Hüfte hoch, halten. Seitliche Rumpfwand.", "outdoor": false, "adv": false}, {"n": "Plank mit Schulter-Tap", "m": ["core", "shoulders"], "g": ["full", "push"], "equip": [], "cue": "Im Plank abwechselnd Schulter antippen, Hüfte ruhig halten.", "outdoor": false, "adv": false}, {"n": "Dead Bug", "m": ["core"], "g": ["legs", "full", "pull"], "equip": [], "cue": "Gegenarm/-bein strecken, unterer Rücken am Boden. Langsam.", "outdoor": false, "adv": false}, {"n": "Hollow Body Hold", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Arme/Beine gestreckt, unterer Rücken flach. Tiefe Rumpfspannung.", "outdoor": false, "adv": false}, {"n": "Reverse Crunch", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Becken von unten aufrollen, Unterbauch. Kontrolliert.", "outdoor": false, "adv": false}, {"n": "Käfer / Bicycle Crunch", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Ellbogen zum gegenüberliegenden Knie, langsam. Schräge Bauchwand.", "outdoor": false, "adv": false}, {"n": "Beinheben (liegend)", "m": ["core"], "g": ["legs", "full"], "equip": [], "cue": "Beine gestreckt heben/senken, unteren Rücken andrücken.", "outdoor": false, "adv": false}, {"n": "Russian Twist (mit KH)", "m": ["core"], "g": ["legs", "full"], "equip": ["dbEITHER"], "cue": "Sitzend, Oberkörper zurück, Gewicht seitlich. Schräge Bauchwand.", "outdoor": false, "adv": false}, {"n": "KH-Woodchopper", "m": ["core"], "g": ["push", "pull", "full"], "equip": ["dbEITHER"], "cue": "Diagonal von unten nach oben, schräge Bauchmuskeln. Explosiv.", "outdoor": false, "adv": false}, {"n": "Suitcase Carry", "m": ["core", "legs"], "g": ["legs", "full", "pull"], "equip": ["dbH"], "cue": "Eine schwere Hantel, aufrecht gehen. Leiste und Rumpf.", "outdoor": false, "adv": false}, {"n": "Farmer's Walk", "m": ["core", "legs", "back"], "g": ["legs", "full", "pull"], "equip": ["dbH"], "cue": "Zwei schwere Hanteln, aufrecht gehen. Ganzkörper-Stabilität.", "outdoor": false, "adv": false}, {"n": "Mountain Climbers", "m": ["core"], "g": ["full", "legs"], "equip": [], "cue": "Knie im Wechsel zur Brust, Hüfte tief. Tempo nach Kondition.", "outdoor": false, "adv": false}, {"n": "Slow Mountain Climbers", "m": ["core"], "g": ["full", "legs"], "equip": [], "cue": "Knie langsam (3 Sek.) zur Brust. Tiefer Hüftbeuger, kontrolliert.", "outdoor": false, "adv": false}, {"n": "Kopenhagen-Plank", "m": ["core", "legs"], "g": ["legs", "full"], "equip": ["bench"], "cue": "Oberes Bein auf Bank, Hüfte hoch. Adduktoren für Padel.", "outdoor": false, "adv": true}, {"n": "Hohlkreuz-Beinheben (Toes-to-Bar-Style)", "m": ["core"], "g": ["legs"], "equip": ["pullup"], "cue": "An der Stange hängend Knie/Beine heben. Unterbauch.", "outdoor": true, "adv": true}, {"n": "Plank Reach", "m": ["core", "shoulders"], "g": ["full"], "equip": [], "cue": "Im Plank Arm nach vorne strecken, Hüfte stabil. Anti-Rotation.", "outdoor": false, "adv": false}, {"n": "Battle Rope Waves", "m": ["shoulders", "core", "arms"], "g": ["push", "pull", "legs", "full"], "equip": ["rope"], "cue": "Kräftige Wellen, Knie leicht gebeugt, Rumpf fest. Kondition.", "outdoor": true, "adv": false}, {"n": "Battle Rope Slams", "m": ["core", "shoulders"], "g": ["full", "legs", "push"], "equip": ["rope"], "cue": "Über den Kopf, kraftvoll runterschlagen. Ganzkörper-Finisher.", "outdoor": true, "adv": false}, {"n": "Battle Rope Wechsel-Wellen", "m": ["shoulders", "arms", "core"], "g": ["push", "pull", "full"], "equip": ["rope"], "cue": "Arme alternierend, konstanter Rhythmus. Ausdauer für Schultern.", "outdoor": true, "adv": false}, {"n": "Burpees", "m": ["chest", "legs", "core"], "g": ["full", "legs", "push"], "equip": [], "cue": "Liegestütz + Sprung. Ganzkörper. Nur bei stabilem Kreislauf.", "outdoor": false, "adv": true}, {"n": "Hampelmänner", "m": ["legs", "shoulders"], "g": ["full", "legs"], "equip": [], "cue": "Klassisch, lockeres Tempo. Gutes Warm-up oder Finisher.", "outdoor": false, "adv": false}, {"n": "High Knees", "m": ["legs", "core"], "g": ["full", "legs"], "equip": [], "cue": "Knie hoch, zügiges Tempo am Stand. Kondition.", "outdoor": false, "adv": false}, {"n": "Crunches auf dem Bauchtrainer", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": ["abtr"], "cue": "Auf der Bank, Oberkörper kontrolliert einrollen, Bauch anspannen. Schwierigkeit über Neigung wählen.", "outdoor": false, "adv": false}, {"n": "Sit-ups auf dem Bauchtrainer", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": ["abtr"], "cue": "Voller Sit-up mit fixierten Beinen, kontrolliert hoch und runter.", "outdoor": false, "adv": false}, {"n": "Seitliche Crunches (Bauchtrainer)", "m": ["core"], "g": ["legs", "full", "push", "pull"], "equip": ["abtr"], "cue": "Seitlich eingedreht einrollen, schräge Bauchmuskeln. Beide Seiten.", "outdoor": false, "adv": false}, {"n": "Rückenstrecker / Hyperextension (Bauchtrainer)", "m": ["back"], "g": ["pull", "legs", "full"], "equip": ["abtr"], "cue": "Bauchlage-Position, Oberkörper aus der Hüfte heben, unteren Rücken kräftigen. Nicht überstrecken.", "outdoor": false, "adv": false}, {"n": "Negativ-Crunch (Bauchtrainer, steilere Stufe)", "m": ["core"], "g": ["legs", "full"], "equip": ["abtr"], "cue": "Höhere Neigungsstufe für mehr Widerstand. Langsam ablassen.", "outdoor": false, "adv": true}];
@@ -593,7 +610,8 @@ let S = {
   favEx:[],
   exComments:{},
   metrics:[],
-  progWeights:{}
+  progWeights:{},
+  logs:{}
 };
 const DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
 const DAYFULL = {Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag',So:'Sonntag'};
@@ -972,6 +990,50 @@ function isTimeExercise(ex){
   return n.indexOf('carry')!==-1 || n.indexOf('walk')!==-1 || n.indexOf('climber')!==-1 ||
          n.indexOf('battle rope')!==-1 || n.indexOf('hampelmänner')!==-1 || n.indexOf('high knees')!==-1;
 }
+// =============== TRAININGSLOG ===============
+// S.logs = { "Übungsname": [ {d:"2026-08-20", w:40, r:"12"}, ... ] }
+function isBodyweight(ex){
+  // Körpergewichtsübung: kein Equipment ODER nur pullup/bench (kein Zusatzgewicht)
+  const e=ex.equip||[];
+  if(e.length===0)return true;
+  return e.every(function(c){return c==='pullup'||c==='bench';});
+}
+function lastLog(exName){
+  const arr=(S.logs&&S.logs[exName])||[];
+  return arr.length?arr[arr.length-1]:null;
+}
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+// Log speichern/aktualisieren: pro Übung max. ein Eintrag pro Tag (überschreibt)
+function saveLog(exName,weight,reps){
+  if(!S.logs)S.logs={};
+  if(!S.logs[exName])S.logs[exName]=[];
+  const arr=S.logs[exName];
+  const today=todayStr();
+  // Leerer Eintrag? nichts speichern
+  const wNum=(weight===''||weight===null||weight===undefined)?null:parseFloat(weight);
+  const rStr=(reps===''||reps===null||reps===undefined)?null:String(reps).trim();
+  if(wNum===null&&(rStr===null||rStr===''))return;
+  const existing=arr.find(function(e){return e.d===today;});
+  if(existing){ existing.w=wNum; existing.r=rStr; }
+  else{ arr.push({d:today,w:wNum,r:rStr}); }
+  autoSave();
+}
+function handleLogInput(el){
+  const exName=decodeURIComponent(el.getAttribute('data-logex'));
+  const field=el.getAttribute('data-logfield'); // 'w' oder 'r'
+  // aktuelle Werte der beiden Felder dieser Übung sammeln
+  const wrap=el.closest('.ex-log');
+  if(!wrap)return;
+  const wEl=wrap.querySelector('[data-logfield="w"]');
+  const rEl=wrap.querySelector('[data-logfield="r"]');
+  const w=wEl?wEl.value:'';
+  const r=rEl?rEl.value:'';
+  saveLog(exName,w,r);
+}
+
 function renderExRow(ex,idx,ctx,star,noRest){
   const g=ctx.goal;
   let dose;
@@ -995,6 +1057,16 @@ function renderExRow(ex,idx,ctx,star,noRest){
   const gifBtn=ex.gif?`<button type="button" class="ex-swap" data-act="togglegif" style="border-color:var(--blue);color:var(--blue);">🎬 Erklärung anzeigen</button>`:'';
   const gifBox=ex.gif?`<div class="ex-gif-box"><img src="${ex.gif}" alt="${ex.n}" loading="lazy"></div>`:'';
 
+  // Trainingslog-Eingabe: vorausgefüllt mit letztem Wert
+  const bw=isBodyweight(ex);
+  const last=lastLog(ex.n);
+  const lastW=(last&&last.w!==null&&last.w!==undefined)?last.w:'';
+  const lastR=(last&&last.r!==null&&last.r!==undefined)?last.r:'';
+  const lastHint=last?`<div class="log-last">letztes Mal (${last.d}): ${last.w!==null&&last.w!==undefined?last.w+' kg · ':''}${last.r||'—'}${bw?'':''}</div>`:'';
+  const wField=bw?'':`<input type="number" inputmode="decimal" class="log-in" data-logex="${enc}" data-logfield="w" value="${lastW}" placeholder="kg ges." aria-label="Gewicht gesamt in kg">`;
+  const rField=`<input type="text" inputmode="numeric" class="log-in" data-logex="${enc}" data-logfield="r" value="${lastR}" placeholder="${isHoldExercise(ex)||isTimeExercise(ex)?'Sek.':'Wdh.'}" aria-label="Wiederholungen oder Zeit">`;
+  const logHtml=`<div class="ex-log">${lastHint}<div class="log-fields">${wField}${rField}</div></div>`;
+
   return `<div class="ex" data-exname="${enc}" data-list="${listKey}">
     ${numCell}
     <div class="ex-info"><div class="en">${ex.n}${favMark}</div><div class="em">${ex.cue}</div>${noteHtml}
@@ -1004,6 +1076,7 @@ function renderExRow(ex,idx,ctx,star,noRest){
       <button type="button" class="ex-swap" data-act="hide" data-ex="${enc}" style="border-color:#f0d5d0;color:var(--red);">✕ sperren</button>
       </div>
       ${gifBox}
+      ${logHtml}
     </div>
     <div class="ex-dose"><b>${dose}</b>${noRest?'<span style="color:var(--blue);font-weight:700;">direkt weiter</span>':'Pause '+g.rest}</div>
   </div>`;
@@ -1458,6 +1531,18 @@ function exMatchesEquip(ex,ef){
   if(ef==='dbEITHER')return ex.equip.indexOf('dbEITHER')!==-1||ex.equip.indexOf('dbH')!==-1||ex.equip.indexOf('dbL')!==-1;
   return ex.equip.indexOf(ef)!==-1;
 }
+function renderLogHistory(exName){
+  const arr=(S.logs&&S.logs[exName])||[];
+  if(!arr.length)return '';
+  // neueste zuerst, max 8 Einträge zeigen
+  const rows=arr.slice().reverse().slice(0,8).map(function(e){
+    const w=(e.w!==null&&e.w!==undefined)?e.w+' kg':'—';
+    const r=e.r||'—';
+    return '<div class="log-row"><span class="log-date">'+e.d+'</span><span class="log-val">'+w+' · '+r+'</span></div>';
+  }).join('');
+  const more=arr.length>8?'<div class="log-more">… und '+(arr.length-8)+' weitere</div>':'';
+  return '<div class="al-loghist"><div class="al-loghead">📊 Verlauf</div>'+rows+more+'</div>';
+}
 function renderAlle(){
   const list=document.getElementById('al-list');
   if(!list)return;
@@ -1496,6 +1581,7 @@ function renderAlle(){
           '<div class="al-tags">'+muscleTags+equipTags+advTag+custTag+'</div>'+
           '<div class="al-cue">'+ex.cue+'</div>'+
           noteBlock+
+          renderLogHistory(ex.n)+
           '<div class="al-noteholder" style="margin-top:6px;"><span class="al-notebtn" data-act="editnote" data-ex="'+enc+'">'+(note?'📝 Hinweis bearbeiten':'📝 Hinweis hinzufügen')+'</span>'+gifBtn+'</div>'+
           gifBox+
         '</div>'+
@@ -1527,6 +1613,7 @@ function loadLocal(){
   if(S.single&&DUR_MIGRATE[S.single.dur])S.single.dur=DUR_MIGRATE[S.single.dur];
   if(S.program&&DUR_MIGRATE[S.program.dur])S.program.dur=DUR_MIGRATE[S.program.dur];
   if(!Array.isArray(S.favEx))S.favEx=[];
+  if(!S.logs||typeof S.logs!=='object')S.logs={};
   if(!S.exComments||typeof S.exComments!=='object')S.exComments={};
   if(!S.single.hasOwnProperty('prefFav'))S.single.prefFav=false;
   if(!S.program.hasOwnProperty('prefFav'))S.program.prefFav=false;
