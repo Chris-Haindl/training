@@ -256,6 +256,16 @@ canvas{width:100%;height:auto;margin-top:10px;}
   .ex-desc-box{display:none!important;}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
+
+/* MEIN PLAN EXTRAS */
+.mp-head-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.mp-done-btn{flex-shrink:0;border:1.5px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.14);color:#fff;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;min-height:36px;white-space:nowrap;}
+.mp-done-btn.done{background:var(--green);border-color:var(--green);color:#fff;}
+.mp-chart-box{margin-top:8px;display:none;}
+.step-btn{flex-shrink:0;border:1.5px solid #dfe6ec;background:#F4F8FB;color:var(--deep);border-radius:8px;padding:0 9px;height:44px;font-size:13px;font-weight:800;cursor:pointer;user-select:none;}
+.step-btn:active{background:var(--blue-l);border-color:var(--blue);}
+.mp-star{cursor:pointer;font-size:16px;margin-left:5px;color:#c8d0d8;user-select:none;}
+.mp-star.on{color:var(--red);}
 </style>
 </head>
 <body>
@@ -267,7 +277,8 @@ canvas{width:100%;height:auto;margin-top:10px;}
 </header>
 
 <nav class="tabbar"><div class="tabbar-inner">
-  <button class="tabbtn active" data-view="single">⚡ Einzelplan</button>
+  <button class="tabbtn active" data-view="myplan">🎯 Mein Plan</button>
+  <button class="tabbtn" data-view="single">⚡ Einzelplan</button>
   <button class="tabbtn" data-view="program">📅 Programm</button>
   <button class="tabbtn" data-view="body">📈 Körperwerte</button>
   <button class="tabbtn" data-view="alle">📚 Alle Übungen</button>
@@ -277,8 +288,30 @@ canvas{width:100%;height:auto;margin-top:10px;}
 
 <div class="wrap">
 
+<!-- ============ MEIN PLAN (4-TAGE-SPLIT) ============ -->
+<div class="view active" id="view-myplan">
+  <div class="panel">
+    <h2>🎯 Mein 4-Tage-Split</h2>
+    <p class="desc">Mittwoch &amp; Sonntag: Ganzkörper-Supersätze · Freitag (Push) &amp; Samstag (Pull): Hybrid-Modell mit schweren Grundübungen &amp; Supersätzen. Hantelgewichte in 0,5-kg-Schritten direkt loggen.</p>
+    <div class="mini">Trainingstag wählen</div>
+    <div class="opt-grid" id="mp-dayFilter" style="margin-bottom:12px;">
+      <div class="opt sel" data-mpf="all">Alle 4 Tage</div>
+      <div class="opt" data-mpf="mi">Mi · Ganzkörper</div>
+      <div class="opt" data-mpf="fr">Fr · Push</div>
+      <div class="opt" data-mpf="sa">Sa · Pull</div>
+      <div class="opt" data-mpf="so">So · Ganzkörper</div>
+    </div>
+    <div class="actions" style="margin-top:0;">
+      <button type="button" class="act primary" data-act="printmyplan">Als PDF / Drucken</button>
+      <button type="button" class="act" data-act="resetmyplandone">↺ Woche zurücksetzen</button>
+      <button type="button" class="act" data-act="resetmyplan" style="border-color:#f0d5d0;color:var(--red);">⚙️ Standard-Plan</button>
+    </div>
+  </div>
+  <div id="mp-list"></div>
+</div>
+
 <!-- ============ SINGLE PLAN ============ -->
-<div class="view active" id="view-single">
+<div class="view" id="view-single">
   <div class="panel">
     <h2>1 · Equipment</h2>
     <p class="desc">Wähle, was verfügbar ist. Schnellwahl setzt die Haken automatisch.</p>
@@ -590,6 +623,14 @@ function handleAction(el){
   else if(act==='toggledesc'){toggleDesc(el);}
   else if(act==='editnote'){openNoteEdit(el.getAttribute('data-ex'));}
   else if(act==='savenote'){var enc=el.getAttribute('data-ex');var inp=document.getElementById('noteinput');saveComment(decodeURIComponent(enc),inp?inp.value:'');}
+  else if(act==='togglempdone'){toggleMyPlanDone(el.getAttribute('data-mpday'));}
+  else if(act==='resetmyplandone'){resetMyPlanDone();}
+  else if(act==='resetmyplan'){resetMyPlanDefault();}
+  else if(act==='printmyplan'){printMyPlan();}
+  else if(act==='togglempchart'){toggleMpChart(el);}
+  else if(act==='mpstep'){stepMpWeight(el);}
+  else if(act==='mpswap'){openMpSwapModal(el.getAttribute('data-mpday'),parseInt(el.getAttribute('data-bidx')),parseInt(el.getAttribute('data-eidx')));}
+  else if(act==='mpfav'){toggleMyPlanFav(decodeURIComponent(el.getAttribute('data-ex')));}
 }
 
 function toggleGif(btn){
@@ -775,7 +816,9 @@ let S = {
   exComments:{},
   metrics:[],
   progWeights:{},
-  logs:{}
+  logs:{},
+  myPlan:null,
+  myPlanDone:{}
 };
 const DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
 const DAYFULL = {Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag',So:'Sonntag'};
@@ -809,6 +852,7 @@ document.querySelectorAll('.tabbtn').forEach(b=>{
     document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     document.getElementById('view-'+b.dataset.view).classList.add('active');
+    if(b.dataset.view==='myplan'){renderMyPlan();}
     if(b.dataset.view==='exlib'){renderCustom();renderHidden();}
     if(b.dataset.view==='body'){renderMetrics();}
     if(b.dataset.view==='alle'){renderAlle();}
@@ -1253,7 +1297,7 @@ function renderExRow(ex,idx,ctx,star,noRest){
   const lastW=(last&&last.w!==null&&last.w!==undefined)?last.w:'';
   const lastR=(last&&last.r!==null&&last.r!==undefined)?last.r:'';
   const lastHint=last?`<div class="log-last">letztes Mal (${last.d}): ${last.w!==null&&last.w!==undefined?last.w+' kg · ':''}${last.r||'—'}</div>`:'';
-  const wField=showW?`<input type="number" inputmode="decimal" class="log-in" data-logex="${enc}" data-logfield="w" value="${lastW}" placeholder="kg ges." aria-label="Gewicht gesamt in kg">`:'';
+  const wField=showW?`<input type="number" step="0.5" inputmode="decimal" class="log-in" data-logex="${enc}" data-logfield="w" value="${lastW}" placeholder="kg ges." aria-label="Gewicht gesamt in kg">`:'';
   const rField=`<input type="text" inputmode="numeric" class="log-in" data-logex="${enc}" data-logfield="r" value="${lastR}" placeholder="${durBased?'Sek.':'Wdh.'}" aria-label="${durBased?'Zeit in Sekunden':'Wiederholungen'}">`;
   const logHtml=`<div class="ex-log">${lastHint}<div class="log-fields">${wField}${rField}</div></div>`;
 
@@ -1865,6 +1909,401 @@ function saveLocal(){
   catch(e){setStatus('Speichern fehlgeschlagen (evtl. privater Modus). Nutze Export.',true);}
 }
 function autoSave(){try{localStorage.setItem('trainingStudio',JSON.stringify(S));}catch(e){}}
+// =============== MEIN PLAN (4-TAGE-SPLIT) ===============
+function defaultMyPlan(){
+  return [
+    {
+      id:'mi',
+      day:'Mittwoch',
+      title:'Ganzkörper Oberkörper',
+      tag:'Supersätze · ca. 40–45 Min.',
+      meta:'6 Übungen · 3 Supersätze · 4 Sätze · 45–60 Sek. Pause',
+      warmup:['chest','back','shoulders'],
+      blocks:[
+        {
+          type:'superset',
+          label:'Supersatz 1 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'Kurzhantel-Bankdrücken',sets:'4',reps:'8–12'},
+            {n:'KH-Rudern vorgebeugt (beidarmig)',sets:'4',reps:'8–12'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 2 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'KH-Schulterdrücken (stehend)',sets:'4',reps:'8–12'},
+            {n:'KH-Rudern (weiter Ellbogen)',sets:'4',reps:'8–12'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 3 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'Liegestütze (Füße erhöht)',sets:'4',reps:'10–15'},
+            {n:'KH-Seitheben (vorgebeugt)',sets:'4',reps:'12–15'}
+          ]
+        }
+      ]
+    },
+    {
+      id:'fr',
+      day:'Freitag',
+      title:'Push · Brust, Schultern & Trizeps',
+      tag:'Hybrid · ca. 45–50 Min.',
+      meta:'7 Übungen · 2 Grundübungen + 2 Supersätze + Abschluss · 4 Sätze',
+      warmup:['chest','shoulders'],
+      blocks:[
+        {
+          type:'single',
+          label:'Schwere Grundübungen · Einzelsätze',
+          hint:'Saubere Technik, kontrollierte Wiederholungen, dazwischen 90–120 Sek. Pause.',
+          rest:'90–120 Sek.',
+          items:[
+            {n:'KH-Schrägbankdrücken',sets:'4',reps:'6–10'},
+            {n:'KH-Schulterdrücken (sitzend)',sets:'4',reps:'6–10'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 1 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'KH-Fliegende',sets:'4',reps:'10–15'},
+            {n:'Trizeps-Dips (Stuhl/Bank)',sets:'4',reps:'10–15'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 2 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'KH-Seitheben',sets:'4',reps:'12–15'},
+            {n:'KH-Trizeps-Kickbacks',sets:'4',reps:'12–15'}
+          ]
+        },
+        {
+          type:'single',
+          label:'Push-Abschluss · Äußere Brust',
+          hint:'Breiter Griff für die äußere Brust zum sauberen Abschluss.',
+          rest:'60 Sek.',
+          items:[
+            {n:'Liegestütze (breit)',sets:'3',reps:'10–15'}
+          ]
+        }
+      ]
+    },
+    {
+      id:'sa',
+      day:'Samstag',
+      title:'Pull · Rücken, Bizeps & Haltung',
+      tag:'Hybrid · ca. 40–45 Min.',
+      meta:'6 Übungen · 2 Grundübungen + 2 Supersätze · 4 Sätze',
+      warmup:['back','shoulders'],
+      blocks:[
+        {
+          type:'single',
+          label:'Schwere Grundübungen · Einzelsätze',
+          hint:'Fokus auf vollen Bewegungsradius und kontrollierte Rückführung.',
+          rest:'90–120 Sek.',
+          items:[
+            {n:'Einarmiges KH-Rudern',sets:'4',reps:'6–10'},
+            {n:'KH-Überzüge (Pullover)',sets:'4',reps:'8–12'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 1 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'KH-Bizeps-Curls (Supination)',sets:'4',reps:'10–15'},
+            {n:'Reverse Snow Angel',sets:'4',reps:'12–15'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 2 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'KH-Hammer-Curls',sets:'4',reps:'10–15'},
+            {n:'Superman-Rudern (W-Zug)',sets:'4',reps:'12–15'}
+          ]
+        }
+      ]
+    },
+    {
+      id:'so',
+      day:'Sonntag',
+      title:'Ganzkörper · Core, Rumpf & Athletik',
+      tag:'Supersätze · ca. 35–40 Min.',
+      meta:'6 Übungen · 3 Supersätze · 4 Sätze · 45–60 Sek. Pause',
+      warmup:['core','legs'],
+      blocks:[
+        {
+          type:'superset',
+          label:'Supersatz 1 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'KH-Woodchopper',sets:'4',reps:'12–15 / Seite'},
+            {n:'Slow Mountain Climbers',sets:'4',reps:'30–40 Sek.'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 2 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:"Farmer's Walk",sets:'4',reps:'30–40 Sek.'},
+            {n:'Plank mit Schulter-Tap',sets:'4',reps:'30–40 Sek.'}
+          ]
+        },
+        {
+          type:'superset',
+          label:'Supersatz 3 · ohne Pause dazwischen',
+          rest:'45–60 Sek.',
+          items:[
+            {n:'Crunches auf dem Bauchtrainer',sets:'4',reps:'12–15'},
+            {n:'Rückenstrecker / Hyperextension (Bauchtrainer)',sets:'4',reps:'12–15'}
+          ]
+        }
+      ]
+    }
+  ];
+}
+
+let myPlanFilter = 'all';
+document.querySelectorAll('#mp-dayFilter .opt').forEach(function(el){
+  el.addEventListener('click',function(){
+    document.querySelectorAll('#mp-dayFilter .opt').forEach(function(x){x.classList.remove('sel');});
+    el.classList.add('sel');
+    myPlanFilter = el.dataset.mpf || 'all';
+    renderMyPlan();
+  });
+});
+
+function lookupEx(name){
+  const custom = (S.customEx||[]).map(function(c){return Object.assign({},c,{custom:true});});
+  const all = BASE_DB.concat(custom);
+  return all.find(function(e){return e.n===name;}) || {n:name,m:['core'],g:['full'],equip:[],cue:'',outdoor:false,adv:false};
+}
+
+function toggleMyPlanDone(dayId){
+  if(!S.myPlanDone||typeof S.myPlanDone!=='object') S.myPlanDone={};
+  S.myPlanDone[dayId] = !S.myPlanDone[dayId];
+  autoSave();
+  renderMyPlan();
+}
+function resetMyPlanDone(){
+  S.myPlanDone={};
+  autoSave();
+  renderMyPlan();
+}
+function resetMyPlanDefault(){
+  if(!confirm('Deinen 4-Tage-Split wieder auf die Standard-Übungen zurücksetzen? (Deine geloggten Gewichte bleiben erhalten.)')) return;
+  S.myPlan = defaultMyPlan();
+  autoSave();
+  renderMyPlan();
+}
+function toggleMyPlanFav(name){
+  if(!Array.isArray(S.favEx)) S.favEx=[];
+  const i = S.favEx.indexOf(name);
+  if(i===-1) S.favEx.push(name); else S.favEx.splice(i,1);
+  autoSave();
+  renderMyPlan();
+}
+function toggleMpChart(btn){
+  const parent = btn.closest('.ex-info');
+  if(!parent) return;
+  const box = parent.querySelector('.mp-chart-box');
+  if(!box) return;
+  if(box.style.display==='block'){
+    box.style.display='none';
+    btn.textContent='📈 Verlauf';
+  }else{
+    box.style.display='block';
+    btn.textContent='✕ Verlauf';
+  }
+}
+function stepMpWeight(btn){
+  const delta = parseFloat(btn.getAttribute('data-delta')) || 0;
+  const wrap = btn.closest('.ex-log');
+  if(!wrap) return;
+  const wEl = wrap.querySelector('[data-logfield="w"]');
+  const rEl = wrap.querySelector('[data-logfield="r"]');
+  if(!wEl) return;
+  const cur = parseFloat(wEl.value);
+  const base = isNaN(cur) ? 0 : cur;
+  const next = Math.max(0, Math.round((base + delta) * 2) / 2);
+  wEl.value = next;
+  const exName = decodeURIComponent(wEl.getAttribute('data-logex'));
+  saveLog(exName, next, rEl ? rEl.value : '');
+}
+
+function openMpSwapModal(dayId, bIdx, eIdx){
+  if(!S.myPlan) S.myPlan = defaultMyPlan();
+  const dayObj = S.myPlan.find(function(d){return d.id===dayId;});
+  if(!dayObj) return;
+  const item = dayObj.blocks[bIdx].items[eIdx];
+  const curEx = lookupEx(item.n);
+  const eq = makeEq(S.single.equip);
+  const db = activeDB();
+  let sameMuscle = db.filter(function(e){
+    return e.n!==item.n && exAllowed(e,eq) && e.m.some(function(m){return curEx.m.indexOf(m)!==-1;});
+  });
+  let others = db.filter(function(e){
+    return e.n!==item.n && exAllowed(e,eq) && !e.m.some(function(m){return curEx.m.indexOf(m)!==-1;});
+  });
+  const modal = document.createElement('div');
+  modal.id = 'mpSwapModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:220;overflow-y:auto;padding:20px 12px;';
+  function optionHtml(e){
+    const enc = encodeURIComponent(e.n);
+    return '<div class="al-card" style="cursor:pointer;" data-pickex="'+enc+'">'+
+      '<div class="al-name">'+e.n+'</div>'+
+      '<div class="al-cue">'+e.cue+'</div>'+
+    '</div>';
+  }
+  modal.innerHTML = '<div style="max-width:720px;margin:0 auto;background:#fff;border-radius:14px;padding:16px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+      '<strong style="color:var(--deep);font-size:15px;">Übung tauschen: '+item.n+'</strong>'+
+      '<button type="button" class="act" id="mpSwapClose" style="flex:0 0 auto;min-width:auto;padding:8px 14px;min-height:38px;">✕</button>'+
+    '</div>'+
+    '<div class="mini">Passende Muskelgruppe ('+sameMuscle.length+')</div>'+
+    sameMuscle.map(optionHtml).join('')+
+    '<div class="mini" style="margin-top:12px;">Weitere Übungen ('+others.length+')</div>'+
+    others.map(optionHtml).join('')+
+  '</div>';
+  modal.addEventListener('click',function(ev){
+    if(ev.target===modal){ modal.remove(); return; }
+    const card = ev.target.closest('[data-pickex]');
+    if(card){
+      const newName = decodeURIComponent(card.getAttribute('data-pickex'));
+      dayObj.blocks[bIdx].items[eIdx].n = newName;
+      autoSave();
+      modal.remove();
+      renderMyPlan();
+    }
+  });
+  document.body.appendChild(modal);
+  const cb = modal.querySelector('#mpSwapClose');
+  if(cb) cb.addEventListener('click',function(){modal.remove();});
+}
+
+function renderMyPlanExRow(item, idx, dayId, bIdx, eIdx, restText, noRest){
+  const ex = lookupEx(item.n);
+  const enc = encodeURIComponent(ex.n);
+  const dose = item.sets + ' × ' + item.reps;
+  const isFav = (S.favEx||[]).indexOf(ex.n) !== -1;
+  const note = (S.exComments||{})[ex.n];
+  const noteHtml = note ? '<div class="em" style="color:var(--blue);margin-top:3px;">📝 '+note+'</div>' : '';
+
+  const gifBtn = ex.gif ? '<button type="button" class="ex-swap" data-act="togglegif" style="border-color:var(--blue);color:var(--blue);">🎬 Video</button>' : '';
+  const gifBox = ex.gif ? '<div class="ex-gif-box"><img src="'+ex.gif+'" alt="'+ex.n+'" loading="lazy"></div>' : '';
+  const hasDesc = typeof EX_DESC!=='undefined' && EX_DESC[ex.n];
+  const descBtn = hasDesc ? '<button type="button" class="ex-swap" data-act="toggledesc" style="border-color:var(--blue);color:var(--blue);">📖 Erklärung</button>' : '';
+  const descBox = hasDesc ? '<div class="ex-desc-box">'+descToHtml(EX_DESC[ex.n])+'</div>' : '';
+
+  const histHtml = renderLogHistory(ex.n);
+  const chartBtn = histHtml ? '<button type="button" class="ex-swap" data-act="togglempchart" style="border-color:var(--green);color:var(--green);">📈 Verlauf</button>' : '';
+  const chartBox = histHtml ? '<div class="mp-chart-box">'+histHtml+'</div>' : '';
+
+  const showW = hasWeight(ex);
+  const durBased = isDurationBased(ex) || (item.reps && item.reps.indexOf('Sek')!==-1);
+  const last = lastLog(ex.n);
+  const lastW = (last&&last.w!==null&&last.w!==undefined) ? last.w : '';
+  const lastR = (last&&last.r!==null&&last.r!==undefined) ? last.r : '';
+  const lastHint = last ? '<div class="log-last">letztes Mal ('+last.d+'): '+(last.w!==null&&last.w!==undefined?last.w+' kg · ':'')+(last.r||'—')+'</div>' : '';
+
+  const wField = showW
+    ? '<button type="button" class="step-btn" data-act="mpstep" data-delta="-0.5" aria-label="Minus 0,5 kg">-0,5</button>'+
+      '<input type="number" step="0.5" inputmode="decimal" class="log-in" data-logex="'+enc+'" data-logfield="w" value="'+lastW+'" placeholder="kg ges." aria-label="Gewicht in kg">'+
+      '<button type="button" class="step-btn" data-act="mpstep" data-delta="0.5" aria-label="Plus 0,5 kg">+0,5</button>'
+    : '';
+  const rField = '<input type="text" inputmode="numeric" class="log-in" data-logex="'+enc+'" data-logfield="r" value="'+lastR+'" placeholder="'+(durBased?'Sek.':'Wdh.')+'" aria-label="'+(durBased?'Zeit in Sekunden':'Wiederholungen')+'">';
+  const logHtml = '<div class="ex-log">'+lastHint+'<div class="log-fields">'+wField+rField+'</div></div>';
+
+  return '<div class="ex">'+
+    '<div class="ex-n">'+idx+'</div>'+
+    '<div class="ex-info">'+
+      '<div class="en">'+ex.n+'<span class="mp-star'+(isFav?' on':'')+'" data-act="mpfav" data-ex="'+enc+'" title="Favorit umschalten">'+(isFav?'★':'☆')+'</span></div>'+
+      '<div class="em">'+ex.cue+'</div>'+
+      noteHtml+
+      '<div style="margin-top:6px;display:flex;gap:7px;flex-wrap:wrap;">'+
+        descBtn+gifBtn+chartBtn+
+        '<button type="button" class="ex-swap" data-act="mpswap" data-mpday="'+dayId+'" data-bidx="'+bIdx+'" data-eidx="'+eIdx+'">⟳ tauschen</button>'+
+      '</div>'+
+      descBox+gifBox+chartBox+logHtml+
+    '</div>'+
+    '<div class="ex-dose"><b>'+dose+'</b>'+(noRest?'<span style="color:var(--blue);font-weight:700;">direkt weiter</span>':'Pause '+restText)+'</div>'+
+  '</div>';
+}
+
+function renderMyPlan(){
+  const container = document.getElementById('mp-list');
+  if(!container) return;
+  if(!Array.isArray(S.myPlan) || !S.myPlan.length) S.myPlan = defaultMyPlan();
+  if(!S.myPlanDone || typeof S.myPlanDone!=='object') S.myPlanDone = {};
+
+  const days = S.myPlan.filter(function(d){ return myPlanFilter==='all' || d.id===myPlanFilter; });
+  container.innerHTML = days.map(function(d){
+    const isDone = !!S.myPlanDone[d.id];
+    const warmHtml = '<div class="block"><span class="block-label warm">Warm-up · 3–5 Min.</span><div class="block-hint">'+warmupFor(d.warmup||['chest','back'])+'</div></div>';
+    let blocksHtml = '';
+    let ssCounter = 0, singleCounter = 0;
+    d.blocks.forEach(function(bl, bIdx){
+      if(bl.type==='superset'){
+        ssCounter++;
+        const rows = bl.items.map(function(it, eIdx){
+          const isLast = (eIdx === bl.items.length - 1);
+          return renderMyPlanExRow(it, eIdx+1, d.id, bIdx, eIdx, bl.rest, !isLast);
+        }).join('');
+        blocksHtml += '<div class="ss-block">'+
+          '<div class="ss-head">'+(bl.label || ('Supersatz '+ssCounter+' · ohne Pause dazwischen'))+'</div>'+
+          rows+
+          '<div class="ss-rest">Danach Pause: '+(bl.rest||'45–60 Sek.')+'</div>'+
+        '</div>';
+      }else{
+        const rows = bl.items.map(function(it, eIdx){
+          singleCounter++;
+          return renderMyPlanExRow(it, singleCounter, d.id, bIdx, eIdx, bl.rest||'90–120 Sek.', false);
+        }).join('');
+        const hintHtml = bl.hint ? '<div class="block-hint">'+bl.hint+'</div>' : '';
+        blocksHtml += '<div class="block"><span class="block-label">'+(bl.label||'Hauptblock')+'</span>'+hintHtml+rows+'</div>';
+      }
+    });
+
+    return '<div class="result" style="'+(isDone?'border-color:var(--green);':'')+'">'+
+      '<div class="result-head" style="'+(isDone?'background:linear-gradient(160deg,#185a46,var(--green));':'')+'">'+
+        '<div class="mp-head-row">'+
+          '<div>'+
+            '<div class="rtag">'+d.day+' · '+d.tag+'</div>'+
+            '<h3>'+d.title+'</h3>'+
+            '<div class="rmeta">'+d.meta+'</div>'+
+          '</div>'+
+          '<button type="button" class="mp-done-btn'+(isDone?' done':'')+'" data-act="togglempdone" data-mpday="'+d.id+'">'+(isDone?'✓ Erledigt':'○ Abhaken')+'</button>'+
+        '</div>'+
+      '</div>'+
+      warmHtml+
+      (d.blocks.some(function(b){return b.type==='superset';}) && d.blocks[0].type==='superset'
+        ? '<div class="block">'+blocksHtml+'</div>'
+        : blocksHtml)+
+    '</div>';
+  }).join('');
+}
+
+function printMyPlan(){
+  const mp = document.getElementById('mp-list');
+  if(!mp) return;
+  const pa = document.getElementById('printArea');
+  pa.innerHTML = '<div style="padding:16px;">'+mp.innerHTML+'</div>';
+  pa.style.display = 'block';
+  window.print();
+  setTimeout(function(){pa.style.display='none';pa.innerHTML='';},600);
+}
+
 function loadLocal(){
   try{const d=localStorage.getItem('trainingStudio');if(d){S=Object.assign(S,JSON.parse(d));}}catch(e){}
   // Muskelversagen-Option deaktiviert: aus evtl. alten Speicherständen hart abschalten
@@ -1879,6 +2318,8 @@ function loadLocal(){
   if(!S.exComments||typeof S.exComments!=='object')S.exComments={};
   if(!S.single.hasOwnProperty('prefFav'))S.single.prefFav=false;
   if(!S.program.hasOwnProperty('prefFav'))S.program.prefFav=false;
+  if(!Array.isArray(S.myPlan)||!S.myPlan.length)S.myPlan=defaultMyPlan();
+  if(!S.myPlanDone||typeof S.myPlanDone!=='object')S.myPlanDone={};
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
@@ -1891,13 +2332,14 @@ function exportData(){
 function importData(ev){
   const f=ev.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=e=>{try{S=Object.assign(S,JSON.parse(e.target.result));autoSave();initDayConfig();renderCustom();renderHidden();renderMetrics();renderAlle();renderEquipGrid('single');renderEquipGrid('program');setStatus('Importiert ✓');}catch(err){setStatus('Import fehlgeschlagen – falsche Datei?',true);}};
+  r.onload=e=>{try{S=Object.assign(S,JSON.parse(e.target.result));autoSave();initDayConfig();renderCustom();renderHidden();renderMetrics();renderAlle();renderMyPlan();renderEquipGrid('single');renderEquipGrid('program');setStatus('Importiert ✓');}catch(err){setStatus('Import fehlgeschlagen – falsche Datei?',true);}};
   r.readAsText(f);
 }
 function setStatus(msg,err){const s=document.getElementById('d-status');s.textContent=msg;s.style.color=err?'#E2001A':'#2C9C7A';}
 
 // =============== INIT ===============
 loadLocal();
+renderMyPlan();
 initDayConfig();
 renderEquipGrid('single');
 renderEquipGrid('program');
